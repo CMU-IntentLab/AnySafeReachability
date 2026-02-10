@@ -302,7 +302,6 @@ def get_class_from_xy(labels):
 
     return class_labels
 
-
 BL = 4
 BS = 16
 open_loop = True
@@ -346,12 +345,6 @@ for k in range(nb_classes):
         f"/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_latent_safe/class_{k}_best_classifier_dino.pth",
     )
     latent_safe_classifiers[k].eval()
-
-multi_class_classifier = copy.deepcopy(transition)
-load_state_dict_flexible(
-    multi_class_classifier,
-    "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints/multi_class_classifier_dino.pth",
-)
 
 # Policy Setup
 actor_activation = torch.nn.ReLU
@@ -442,10 +435,6 @@ constraint = transition.semantic_embed(
     state=select_xyyaw_from_state(const_data["state"]).to(device).unsqueeze(0),
 ).detach()[0, -1]
 
-import ipdb
-
-ipdb.set_trace()
-
 coverage_total = torch.zeros((224, 224), dtype=torch.float32, device="cuda")  # if GPU
 
 _class = 0
@@ -480,7 +469,6 @@ for i in range(nb_classes):
     axes[2, i].set_title(rf"Value Function $V(z,p_{i})$", fontsize=20)
     # axes[3, i].set_title(r"Latent Safe Classifier $l(z)$", fontsize=20)
     # axes[4, i].set_title(r"Latent Safe Value Fn $V(z)$", fontsize=20)
-    # axes[5, i].set_title(r"Multi-Class Classifier $l(z)[i]$", fontsize=20)
 
 # Generate constraint set
 constraints = []
@@ -594,20 +582,6 @@ for i, data in tqdm(enumerate(train_loader), total=tot):
                 .numpy()
             )
         )[:, -1, 0]
-
-        # Multi-Class Classifier
-        # lz_mc = np.tanh(
-        #     2
-        #     * (
-        #         multi_class_classifier.multi_class_pred(
-        #             inp1=data["cam_zed_embd"].to(device),
-        #             state=select_xyyaw_from_state(data["state"]).to(device),
-        #         )
-        #         .detach()
-        #         .cpu()
-        #         .numpy()
-        #     )
-        # )[:, -1, _class]
 
         center = data["failure"][:, -1]
 

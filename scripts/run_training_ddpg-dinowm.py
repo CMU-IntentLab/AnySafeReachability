@@ -74,13 +74,6 @@ if args.latent_safe:
 else:
     # wm.load_state_dict(
     #     torch.load(
-    #         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_mrg_0.1_alpha_32_bound_2x3.pth"
-    #     ),
-    #     strict=False,
-    # )
-
-    # wm.load_state_dict(
-    #     torch.load(
     #         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_priv_mrg_0.1.pth"
     #     ),
     #     strict=False,
