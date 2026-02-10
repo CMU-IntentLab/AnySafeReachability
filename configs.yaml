@@ -1,0 +1,216 @@
+defaults:
+  # Dubins car environment parameters
+  speed: 1.
+  turnRate: 1.25
+  x_min: -1.5
+  x_max: 1.5
+  y_min: -1.5
+  y_max: 1.5
+  buffer: 0.1
+  dt: 0.05
+  obs_x: 0
+  obs_y: 0
+  obs_r: 0.5
+
+  # offline data parameters
+  data_length: 100
+  num_trajs: 4000 # 2000 in paper
+  num_train_trajs: 3800 #1900 in paper
+  size: [128, 128]
+  dataset_path: 'wm_demos_dubins_sc_F_arrow_0.15_128.pkl' # '128' should be the same as the size above
+  
+  # offline dreamer parameters, these are from https://github.com/NM512/dreamerv3_torch
+  wm_name: ''
+  logdir: 'logs/dreamer_dubins' 
+  rssm_ckpt_path: logs/dreamer_dubins/rssm_ckpt.pt # change this to whatever the path to your rssm checkpoint is
+  traindir: null
+  evaldir: null
+  offline_traindir: ''
+  offline_evaldir: ''
+  seed: 0
+  deterministic_run: False
+  steps: 1e6
+  parallel: False
+  eval_every: 5e2
+  eval_episode_num: 10
+  log_every: 5e2
+  reset_every: 0
+  device: 'cuda:0'
+  compile: True
+  precision: 32
+  debug: False
+  video_pred_log: True
+
+  rssm_train_steps: 10000 # 100000 in paper
+  
+  # Environment
+  task: 'dubins-wm'
+  envs: 1
+  action_repeat: 1
+  time_limit: 100
+  grayscale: False
+  prefill: 5000
+  reward_EMA: True
+
+  # Model
+  dyn_hidden: 512
+  dyn_deter: 512
+  dyn_stoch: 32
+  dyn_discrete: 0 # 0 for continuous latent
+  dyn_rec_depth: 1
+  dyn_mean_act: 'none'
+  dyn_std_act: 'sigmoid2'
+  dyn_min_std: 0.1
+  grad_heads: ['decoder', 'cont'] # ,  'margin']
+  units: 512
+  act: 'SiLU'
+  norm: True
+  encoder:
+    {mlp_keys: 'obs_state', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
+    # {mlp_keys: '', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
+  decoder:
+    {mlp_keys: 'obs_state', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
+    # {mlp_keys: '', cnn_keys: 'image', act: 'SiLU', norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
+  actor:
+    {layers: 2, dist: 'normal', entropy: 3e-4, unimix_ratio: 0.01, std: 'learned', min_std: 0.1, max_std: 1.0, temp: 0.1, lr: 3e-5, eps: 1e-5, grad_clip: 100.0, outscale: 1.0}
+  critic:
+    {layers: 2, dist: 'symlog_disc', slow_target: True, slow_target_update: 1, slow_target_fraction: 0.02, lr: 3e-5, eps: 1e-5, grad_clip: 100.0, outscale: 0.0}
+  #reward_head:
+  #  {layers: 2, dist: 'symlog_disc', loss_scale: 1.0, outscale: 0.0}
+  cont_head:
+    {layers: 2, loss_scale: 1.0, outscale: 1.0}
+  # new
+  margin_head:
+    {layers: 2, loss_scale: 10.0}
+  gamma_lx: 0.75 
+  dyn_scale: 0.5
+  rep_scale: 0.1
+  kl_free: 1.0
+  weight_decay: 0.0
+  unimix_ratio: 0.01
+  initial: 'learned'
+
+  # Dataset generation
+  show_constraint: False
+  constraint_color: 'red'
+  arrow_size: 0.15 # Smaller is bigger here
+
+  # Training
+  batch_size: 16
+  batch_length: 64
+  train_ratio: 512
+  pretrain: 100
+  model_lr: 1e-4
+  obs_lr: 1e-3
+  lx_lr: 1e-4
+  opt_eps: 1e-8
+  grad_clip: 1000
+  dataset_size: 1000000
+  opt: 'adam'
+
+  # Behavior.
+  discount: 0.997
+  discount_lambda: 0.95
+  imag_horizon: 15
+  imag_gradient: 'dynamics'
+  imag_gradient_mix: 0.0
+  eval_state_mean: False
+
+  # Exploration
+  expl_behavior: 'greedy'
+  expl_until: 0
+  expl_extr_scale: 0.0
+  expl_intr_scale: 1.0
+  disag_target: 'stoch'
+  disag_log: True
+  disag_models: 10
+  disag_offset: 1
+  disag_layers: 4
+  disag_units: 400
+  disag_action_cond: False
+
+  
+  # LCRL
+  reward-threshold: null 
+  #seed: 0 
+  buffer-size: 1e6 # type=float, default=40000)
+  actor-lr: 1e-4
+  critic-lr: 1e-3
+  gamma-pyhj: 0.9999 # type=float, default=0.95)
+  tau: 0.005 # type=float, default=0.005)
+  exploration-noise: 0.1 # type=float, default=0.1)
+  epoch: 1 # type=int, default=10)
+  warmup: 1 # number of epochs for warm up
+  total-episodes: 20 # type=int, default=160)
+  step-per-epoch: 40000 # type=int, default=40000)
+  step-per-collect: 16 # type=int, default=8)
+  update-per-step: 0.125 # type=float, default=0.125)
+  batch_size-pyhj: 512 # type=int, default=512)
+  control-net: [512, 512, 512, 512] # type=int, nargs='*', default=None) # for control policy
+  critic-net: [512, 512, 512, 512]  # type=int, nargs='*', default=None) # for critic net
+  constraint-embedding-dim: 512
+  pass-semantic-constraint: True
+  pass-semantic-state: False
+  control-net-const: [] # type=int, nargs='*', default=(128, 128)
+  training-num: 16 # type=int, default=8)
+  test-num: 1 # type=int, default=100)
+  render: 0. # type=float, default=0.)
+  rew-norm: False # action='store_true', default=False)
+  n-step: 1 # type=int, default=1)
+  continue-training-logdir: null # type=str, default=None)
+  continue-training-epoch: null # type=int, default=None)
+  actor-gradient-steps: 1 # type=int, default=1)
+  is-game-baseline: False # type=bool, default=False) # it will be set automatically
+  target-update-freq: 400 # type=int, default=400)
+  auto-alpha: 1
+  alpha-lr: 3e-4
+  alpha: 0.2 
+  weight-decay-pyhj: 0.001
+
+  env-dist-type: ds # 'v' - vanilla, 'fc' - four corners, 'fcfe' - four corners four edges, 'rh' - right half, 'br' - big radii, 'uni' - uniform, 'rhfe' - right half four edges, 'rhbr' - right half big radii
+  safety-margin-type: 'cos_sim' # cos_sim, learned
+  safety-margin-threshold: -0.64 # type=float, default=0.5)
+  safety-margin-hard-threshold: False # type=bool, default=False)
+  pass-prototype: False # type=bool, default=False) # whether to pass a prototype to the policy net, not the raw constraint
+
+  safety_filter_eps: 2.0
+  
+  actor-activation: 'ReLU' #type=str, default='ReLU')
+  critic-activation: 'ReLU' # type=str, default='ReLU')
+  kwargs: {} # type=str, default='{}')
+  warm-start-path: null # type=str, default=None) # e.g., log/ra_droneracing_Game-v6/epoch_id_10/policy.pth
+
+  nx: 51
+  ny: 51
+  nt: 51
+
+  # Proxy Anchor
+  pa:
+    sz_embedding: 512 # Size of embedding that is appended to backbone model.
+    sz_batch: 150 # Number of samples per batch.
+    nb_epochs: 60 # Number of training epochs.
+    gpu_id: 0 # ID of GPU that is used for training.
+    nb_workers: 4 # Number of workers for dataloader.
+    loss: 'Proxy_Anchor' # Criterion for training
+    optimizer: 'adamw' # Optimizer setting
+    lr: 1e-4 # Learning rate setting
+    weight_decay: 1e-4 # Weight decay setting
+    lr_decay_step: 10 # Learning decay step setting
+    lr_decay_gamma: 0.5 # Learning decay gamma setting
+    alpha: 32 # Scaling Parameter setting
+    mrg: 0.1 # Margin parameter setting
+    temp: 0.05 # Temperature for softmax in Proxy Anchor
+    beta: 0.1 # Beta parameter for Proxy Anchor loss, controls the influence of unlabeled data
+    IPC: 32 # Balanced sampling, images per class
+    warm: 1 # Warmup training epochs
+    bn_freeze: 1 # Batch normalization parameter freeze
+    l2_norm: 1 # L2 normalization
+    remark: '' # Any remark
+    save_model: True # Don't save model
+    num_examples_per_class: None # Number of examples per class for training, None means all
+    use_unlabeled_data: False # Use unlabeled data for training
+    unlabeled_ratio: 1.5 # Ratio of unlabeled data to labeled data for
+    ratio_schedule: 'const' # Schedule for the ratio of unlabeled data to labeled data
+  train_test_split: 'uni' # 'circ' for circular split, 'uni' for uniform split, 'sq' for random square being test
+  grid_size: 2 # Grid size for labels
+  nb_classes: 4 # All four quadrants
