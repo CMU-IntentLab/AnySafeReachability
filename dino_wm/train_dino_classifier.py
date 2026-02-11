@@ -15,7 +15,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 import wandb
-from proxy_anchor.utils import load_state_dict_flexible
+from utils import load_state_dict_flexible
 
 dino = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14_reg")
 

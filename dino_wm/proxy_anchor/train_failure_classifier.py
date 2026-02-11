@@ -18,7 +18,7 @@ from utils import compare_kdes, load_state_dict_flexible
 import wandb
 from dino_wm.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
 from dino_wm.test_loader import SplitTrajectoryDataset
-from proxy_anchor.code import losses
+from dino_wm.utils import PrivilegedTeacherForcingLoss
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend(
@@ -35,10 +35,7 @@ torch.cuda.manual_seed_all(seed)  # set random seed for all gpus
 
 
 def make_parser():
-    parser = argparse.ArgumentParser(
-        description="Official implementation of `Proxy Anchor Loss for Deep Metric Learning`"
-        + "Our code is modified from `https://github.com/dichotomies/proxy-nca`"
-    )
+    parser = argparse.ArgumentParser()
     # export directory, training and val datasets, test datasets
     parser.add_argument(
         "--embedding-size",
@@ -71,8 +68,7 @@ def make_parser():
         dest="nb_workers",
         help="Number of workers for dataloader.",
     )
-    parser.add_argument("--model", default="bn_inception", help="Model for training")
-    parser.add_argument("--loss", default="Proxy_Anchor", help="Criterion for training")
+    parser.add_argument("--loss", default="priv", help="Criterion for training")
     parser.add_argument("--optimizer", default="adamw", help="Optimizer setting")
     parser.add_argument("--lr", default=1e-4, type=float, help="Learning rate setting")
     parser.add_argument(
@@ -88,57 +84,10 @@ def make_parser():
         "--alpha", default=32, type=float, help="Scaling Parameter setting"
     )
     parser.add_argument(
-        "--mrg", default=0.1, type=float, help="Margin parameter setting"
-    )
-    parser.add_argument(
-        "--temp",
-        default=0.05,
-        type=float,
-        help="Temperature for softmax in Proxy Anchor",
-    )
-    parser.add_argument(
-        "--beta",
-        default=0.1,
-        type=float,
-        help="Beta parameter for Proxy Anchor loss, controls the influence of unlabeled data",
-    )
-    parser.add_argument("--IPC", type=int, help="Balanced sampling, images per class")
-    parser.add_argument("--warm", default=1, type=int, help="Warmup training epochs")
-    parser.add_argument(
-        "--bn-freeze", default=1, type=int, help="Batch normalization parameter freeze"
-    )
-    parser.add_argument("--l2-norm", default=1, type=int, help="L2 normlization")
-    parser.add_argument("--remark", default="", help="Any remark")
-    parser.add_argument(
         "--dont-save-model",
         dest="save_model",
         action="store_false",
         help="Don't save model",
-    )
-    parser.add_argument(
-        "--num-examples-per-class",
-        type=int,
-        default=None,  # None means all examples
-        help="Number of examples per class for training",
-    )
-    parser.add_argument(
-        "--use-unlabeled-data",
-        action="store_true",
-        default=False,
-        help="Use unlabeled data for training",
-    )
-    parser.add_argument(
-        "--unlabeled-ratio",
-        type=float,
-        default=1.5,
-        help="Ratio of unlabeled data to labeled data for training",
-    )
-    parser.add_argument(
-        "--ratio-schedule",
-        type=str,
-        default="const",
-        choices=["const", "lin", "exp"],
-        help="Schedule for the ratio of unlabeled data to labeled data",
     )
     return parser
 
@@ -261,32 +210,15 @@ load_state_dict_flexible(model, "../checkpoints/best_testing.pth")
 for name, param in model.named_parameters():
     param.requires_grad = name.startswith("semantic_encoder")
 
-# DML Losses
-if args.loss == "triplet":
-    params = {"margin": args.mrg}
-    criterion = losses.TripletLoss(**params).cuda()
-elif args.loss == "contrastive":
-    params = {"margin": args.mrg}
-    criterion = losses.ContrastiveLoss(**params).cuda()
+params = {}
 
-elif args.loss == "npair":
-    params = {}
-    criterion = losses.NPairLoss().cuda()
+def mapping_fn(X):
+    # Maps a distance to a cosine similarity
+    # Distance of 1.0 -> cosine sim of -1.0
+    # Distance of 0.0 -> cosine sim of 1.0
+    return -2 * (X / 180) + 1
 
-elif args.loss == "multisimilarity":
-    params = {}
-    criterion = losses.MultiSimilarityLoss().cuda()
-
-elif args.loss == "priv":
-    params = {}
-
-    def mapping_fn(X):
-        # Maps a distance to a cosine similarity
-        # Distance of 1.0 -> cosine sim of -1.0
-        # Distance of 0.0 -> cosine sim of 1.0
-        return -2 * (X / 180) + 1
-
-    criterion = losses.PrivilegedTeacherForcingLoss(mapping_fn=mapping_fn)
+criterion = PrivilegedTeacherForcingLoss(mapping_fn=mapping_fn)
 
 
 # Wandb Initialization

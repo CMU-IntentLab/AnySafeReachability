@@ -29,10 +29,7 @@ torch.cuda.manual_seed_all(seed)  # set random seed for all gpus
 
 
 def make_parser():
-    parser = argparse.ArgumentParser(
-        description="Official implementation of `Proxy Anchor Loss for Deep Metric Learning`"
-        + "Our code is modified from `https://github.com/dichotomies/proxy-nca`"
-    )
+    parser = argparse.ArgumentParser()
     # export directory, training and val datasets, test datasets
     parser.add_argument(
         "--embedding-size",
@@ -65,8 +62,7 @@ def make_parser():
         dest="nb_workers",
         help="Number of workers for dataloader.",
     )
-    parser.add_argument("--model", default="bn_inception", help="Model for training")
-    parser.add_argument("--loss", default="Proxy_Anchor", help="Criterion for training")
+    parser.add_argument("--loss", default="priv", help="Criterion for training")
     parser.add_argument("--optimizer", default="adamw", help="Optimizer setting")
     parser.add_argument("--lr", default=1e-4, type=float, help="Learning rate setting")
     parser.add_argument(
@@ -79,60 +75,10 @@ def make_parser():
         "--lr-decay-gamma", default=0.5, type=float, help="Learning decay gamma setting"
     )
     parser.add_argument(
-        "--alpha", default=32, type=float, help="Scaling Parameter setting"
-    )
-    parser.add_argument(
-        "--mrg", default=0.1, type=float, help="Margin parameter setting"
-    )
-    parser.add_argument(
-        "--temp",
-        default=0.05,
-        type=float,
-        help="Temperature for softmax in Proxy Anchor",
-    )
-    parser.add_argument(
-        "--beta",
-        default=0.1,
-        type=float,
-        help="Beta parameter for Proxy Anchor loss, controls the influence of unlabeled data",
-    )
-    parser.add_argument("--IPC", type=int, help="Balanced sampling, images per class")
-    parser.add_argument("--warm", default=1, type=int, help="Warmup training epochs")
-    parser.add_argument(
-        "--bn-freeze", default=1, type=int, help="Batch normalization parameter freeze"
-    )
-    parser.add_argument("--l2-norm", default=1, type=int, help="L2 normlization")
-    parser.add_argument("--remark", default="", help="Any remark")
-    parser.add_argument(
         "--dont-save-model",
         dest="save_model",
         action="store_false",
         help="Don't save model",
-    )
-    parser.add_argument(
-        "--num-examples-per-class",
-        type=int,
-        default=None,  # None means all examples
-        help="Number of examples per class for training",
-    )
-    parser.add_argument(
-        "--use-unlabeled-data",
-        action="store_true",
-        default=False,
-        help="Use unlabeled data for training",
-    )
-    parser.add_argument(
-        "--unlabeled-ratio",
-        type=float,
-        default=1.5,
-        help="Ratio of unlabeled data to labeled data for training",
-    )
-    parser.add_argument(
-        "--ratio-schedule",
-        type=str,
-        default="const",
-        choices=["const", "lin", "exp"],
-        help="Schedule for the ratio of unlabeled data to labeled data",
     )
     return parser
 

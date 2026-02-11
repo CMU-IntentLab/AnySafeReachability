@@ -53,11 +53,11 @@ class Dubins_WM_Env(gym.Env):
         self.pass_constraint = config.safety_margin_type == "cos_sim"
 
         self.state_shape = (
-            config.pa["sz_embedding"] if self.pass_semantic_state else 544
+            config.sem["sz_embedding"] if self.pass_semantic_state else 544
         )
 
         self.constraint_shape = (
-            config.pa["sz_embedding"]
+            config.sem["sz_embedding"]
             if self.pass_semantic_constraint
             else self.state_shape
         )

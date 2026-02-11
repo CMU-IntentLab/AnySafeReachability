@@ -19,7 +19,7 @@ from tqdm import *
 
 import wandb
 from dino_wm.dino_models import VideoTransformer
-from dino_wm.proxy_anchor.utils import load_state_dict_flexible
+from dino_wm.utils import load_state_dict_flexible
 from dino_wm.test_loader import SplitTrajectoryDataset
 from PyHJ.data import Collector, VectorReplayBuffer
 from PyHJ.env import DummyVectorEnv

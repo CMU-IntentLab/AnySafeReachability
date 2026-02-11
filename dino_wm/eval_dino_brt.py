@@ -27,7 +27,7 @@ import sys
 from gymnasium import spaces
 from tqdm import *
 
-from proxy_anchor.utils import load_state_dict_flexible
+from utils import load_state_dict_flexible
 from PyHJ.exploration import GaussianNoise
 from PyHJ.utils.net.common import Net
 from PyHJ.utils.net.continuous import Actor, Critic
@@ -413,8 +413,8 @@ for k in range(nb_classes):
     )
     latent_safe_policies[k].eval()
 
-hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
-hdf5_file_const = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
+hdf5_file = "../data/sweeper/test/consolidated.h5"
+hdf5_file_const = "../data/sweeper/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,
     BL,

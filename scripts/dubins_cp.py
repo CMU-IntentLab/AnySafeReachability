@@ -105,8 +105,8 @@ dummy_variable = PyHJ
 config = get_args()
 # config = tools.set_wm_name(config)
 
-if config.pa["gpu_id"] != -1:
-    torch.cuda.set_device(config.pa["gpu_id"])
+if config.sem["gpu_id"] != -1:
+    torch.cuda.set_device(config.sem["gpu_id"])
 
 
 env = gymnasium.make(config.task, params=[config])
@@ -129,14 +129,14 @@ for name, param in model.named_parameters():
 
 # Decoder
 decoder = torch.nn.Sequential(
-    torch.nn.Linear(config.pa["sz_embedding"], 512),
+    torch.nn.Linear(config.sem["sz_embedding"], 512),
     torch.nn.ReLU(),
     torch.nn.Linear(512, 544),
 ).to(device)
 
 offline_eps = collections.OrderedDict()
-# config.pa["batch_size"] = 1
-# config.pa["batch_length"] = 2
+# config.sem["batch_size"] = 1
+# config.sem["batch_length"] = 2
 # tools.fill_expert_dataset_dubins(config, offline_eps, is_val_set=False)
 # offline_dataset = make_dataset(offline_eps, config)
 # train_len = len(offline_eps) // config.batch_length
@@ -148,7 +148,7 @@ eval_dataset = make_dataset(expert_val_eps, config)
 eval_len = len(expert_val_eps) // config.batch_length
 
 # Dataset Loader and Sampler
-BS = 300  # config.pa["sz_batch"]  # batch size
+BS = 300  # config.sem["sz_batch"]  # batch size
 BL = config.batch_length  # batch length
 
 losses_per_epoch = {

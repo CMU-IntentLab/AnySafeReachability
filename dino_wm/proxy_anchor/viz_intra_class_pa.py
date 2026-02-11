@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 # Import custom modules
 from dino_wm.dino_models import VideoTransformer, normalize_acs
-from dino_wm.proxy_anchor.utils import load_state_dict_flexible
+from dino_wm.utils import load_state_dict_flexible
 from torchvision import transforms
 
 # Add directories to system path

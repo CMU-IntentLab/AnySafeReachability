@@ -184,33 +184,17 @@ defaults:
   ny: 51
   nt: 51
 
-  # Proxy Anchor
-  pa:
+  # Semantic encoder training
+  sem:
     sz_embedding: 512 # Size of embedding that is appended to backbone model.
     sz_batch: 150 # Number of samples per batch.
     nb_epochs: 60 # Number of training epochs.
     gpu_id: 0 # ID of GPU that is used for training.
     nb_workers: 4 # Number of workers for dataloader.
-    loss: 'Proxy_Anchor' # Criterion for training
+    loss: 'priv' # Criterion for training
     optimizer: 'adamw' # Optimizer setting
     lr: 1e-4 # Learning rate setting
     weight_decay: 1e-4 # Weight decay setting
     lr_decay_step: 10 # Learning decay step setting
     lr_decay_gamma: 0.5 # Learning decay gamma setting
-    alpha: 32 # Scaling Parameter setting
-    mrg: 0.1 # Margin parameter setting
-    temp: 0.05 # Temperature for softmax in Proxy Anchor
-    beta: 0.1 # Beta parameter for Proxy Anchor loss, controls the influence of unlabeled data
-    IPC: 32 # Balanced sampling, images per class
-    warm: 1 # Warmup training epochs
-    bn_freeze: 1 # Batch normalization parameter freeze
-    l2_norm: 1 # L2 normalization
-    remark: '' # Any remark
     save_model: True # Don't save model
-    num_examples_per_class: None # Number of examples per class for training, None means all
-    use_unlabeled_data: False # Use unlabeled data for training
-    unlabeled_ratio: 1.5 # Ratio of unlabeled data to labeled data for
-    ratio_schedule: 'const' # Schedule for the ratio of unlabeled data to labeled data
-  train_test_split: 'uni' # 'circ' for circular split, 'uni' for uniform split, 'sq' for random square being test
-  grid_size: 2 # Grid size for labels
-  nb_classes: 4 # All four quadrants

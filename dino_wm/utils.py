@@ -3,6 +3,8 @@ import warnings
 import numpy as np
 import torch
 from scipy.stats import entropy, wasserstein_distance
+import torch.nn.functional as F
+import torch.nn as nn
 
 
 def custom_formatwarning(msg, category, filename, lineno, line=None):
@@ -117,3 +119,23 @@ def compare_kdes(kde1, kde2, grid_size=1000, num_samples=1000, eps=1e-12):
     wass = wasserstein_distance(samples1, samples2)
 
     return jsd, wass
+
+class PrivilegedTeacherForcingLoss(nn.Module):
+    def __init__(self, mapping_fn):
+        torch.nn.Module.__init__(self)
+        self.mapping_fn = mapping_fn
+
+    def forward(self, X, T):
+        # X: [B* T, Z]
+        # T: [B* T]
+        # mapping_fn: maps distance to cosine similarity
+        sem_norm = F.normalize(X, p=2, dim=1)  # [B* T, Z]
+        cos_sim = sem_norm @ sem_norm.T  # [B* T, B* T]
+
+        diff = T.unsqueeze(0) - T.unsqueeze(1)  # [B, B, 2]
+        dists = torch.norm(diff, dim=2)
+        labels = self.mapping_fn(dists)  # [B, B]
+
+        # loss = F.mse_loss(cos_sim, labels)
+        loss = torch.nn.SmoothL1Loss()(cos_sim, labels)
+        return loss

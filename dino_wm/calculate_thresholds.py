@@ -26,7 +26,7 @@ import sys
 from gymnasium import spaces
 from tqdm import *
 
-from proxy_anchor.utils import load_state_dict_flexible
+from utils import load_state_dict_flexible
 from PyHJ.exploration import GaussianNoise
 from PyHJ.utils.net.common import Net
 from PyHJ.utils.net.continuous import Actor, Critic
