@@ -99,7 +99,8 @@ python train_dino_wm.py
 ```
 The best transistion model is saved as `checkpoints/best_testing.pth`
 
-3. Train semantic encoder
+
+## Train Semantic Encoder
 ```bash
 python train_dino_wm.py
 ```
