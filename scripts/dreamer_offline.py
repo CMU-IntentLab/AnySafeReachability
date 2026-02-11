@@ -19,11 +19,13 @@ import collections
 from io import BytesIO
 
 import exploration as expl
+import torch.nn.functional as F
 import gym
 import matplotlib.pyplot as plt
 import models
 import tools
 import torch
+import einops
 from PIL import Image
 from termcolor import cprint
 from torch import nn

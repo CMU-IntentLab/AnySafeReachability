@@ -436,26 +436,23 @@ for key, value in aggregate_metrics.items():
 
 # Save as mp4
 
-# trajs = []
+trajs = []
 
-# for i in tqdm(range(30)):
-#     traj_imgs = env.get_trajectory(policy=policy)
-#     trajs.append(traj_imgs)
+from tqdm import tqdm
+for i in tqdm(range(30)):
+    traj_imgs = env.get_trajectory(policy=policy)
+    trajs.append(traj_imgs)
 
-# trajs = np.concatenate(trajs, axis=0)
-# # Save video as mp4 from numpy array
-# video_frames = np.transpose(trajs, (0, 2, 3, 1))
-# import imageio
+trajs = np.concatenate(trajs, axis=0)
+# Save video as mp4 from numpy array
+video_frames = np.transpose(trajs, (0, 2, 3, 1))
+import imageio
 
-# imageio.mimsave("output.mp4", video_frames, fps=20)
+imageio.mimsave("output.mp4", video_frames, fps=20)
 
-save_path = f"/home/sunny/AnySafe_Reachability/scripts/logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}"
+save_path = f"scripts/logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}"
 with open(f"{save_path}/metrics.txt", "w") as f:
     for key, value in aggregate_metrics.items():
         f.write(f"{key}: {value}\n")
-
-import ipdb
-
-ipdb.set_trace()
 
 # plt.close()

@@ -14,17 +14,20 @@ cd AnySafeReachability
 # Create and activate conda environment
 conda env create -f environment.yml
 conda activate anysafe
+
+# Login to wandb
+wandb login
 ```
 
 ## 🗂️ Dataset Generation
 
-Generate synthetic expert and random trajectory data for training the world model.
+Generate synthetic data for training the world model.
 
 ```bash
 python scripts/generate_data_traj_cont.py
 ```
 
-Generates ... file.
+Generates **`wm_demos_dubins_sc_F_arrow_0.15_128.pkl`** file. (Name may change depending on config)
 
 
 ## 🧠 World Model Training
@@ -52,11 +55,30 @@ Run RL for constraint-conditioned latent-space reachability:
 python scripts/run_training_ddpg-wm.py 
 ```
 
+Download pre-trained filter...
+```bash
+pip install gdown
+gdown ...
+```
+
+## 🎯 Threshold Calibration
+
+Run conformal prediction script
+```bash
+python scripts/dubins_cp.py
+```
+Update desired value in **`configs.yaml`**
+
 ## 📊 Evaluation Tools
 
 Run for analyzing world model
 ```bash
 python scripts/wm_analysis.py 
+```
+
+Evaluate value funtion and policy
+```bash
+python scripts/eval_dubins_ddpg_wm.py 
 ```
 
 ## ⚖️ Baselines

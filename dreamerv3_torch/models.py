@@ -33,7 +33,6 @@ class WorldModel(nn.Module):
         self._step = step
         self._use_amp = True if config.precision == 16 else False
         self._config = config
-        self.nb_classes = config.nb_classes
         shapes = {k: tuple(v.shape) for k, v in obs_space.spaces.items()}
         self.encoder = networks.MultiEncoder(shapes, **config.encoder)
         self.embed_size = self.encoder.outdim
@@ -91,7 +90,6 @@ class WorldModel(nn.Module):
             nn.Linear(512, 512, bias=False),
         )
 
-        # self.proxies = nn.Parameter(torch.randn(self.nb_classes, 512).cuda())
         """self.heads["reward"] = networks.MLP(
             feat_size,
             (255,) if config.reward_head["dist"] == "symlog_disc" else (),
