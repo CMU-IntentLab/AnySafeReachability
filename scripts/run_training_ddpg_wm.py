@@ -137,7 +137,7 @@ wm = models.WorldModel(env.observation_space_full, env.action_space, 0, config)
 #     k[14:]: v for k, v in checkpoint["agent_state_dict"].items() if "_wm" in k
 # }
 # wm.load_state_dict(state_dict, strict=False)
-ckpt_path = "logs/checkpoints_pa/encoder_task_dubins-wm.pth"
+ckpt_path = "logs/checkpoints_sem/encoder_task_dubins-wm.pth"
 wm.load_state_dict(torch.load(ckpt_path), strict=False)
 wm.eval()
 

@@ -317,23 +317,10 @@ transition = VideoTransformer(
     dropout=0.1,
     nb_classes=nb_classes,
 ).to(device)
-# load_state_dict_flexible(transition, "../checkpoints_pa/encoder_0.1.pth")
-# load_state_dict_flexible(transition, "../checkpoints/best_testing.pth")
 
-# load_state_dict_flexible(
-#     transition, "checkpoints_pa/encoder_mrg_0.1_alpha_32_num_ex_all_ul_F_pa.pth"
-# )
-# load_state_dict_flexible(
-#     transition,
-#     "checkpoints_pa/encoder_mrg_0.1_alpha_32_bound_1x3.pth",
-# )
-# load_state_dict_flexible(
-#     transition,
-#     "checkpoints_pa/encoder_mrg_0.1_alpha_32_bound_2x3.pth",
-# )
 load_state_dict_flexible(
     transition,
-    "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_priv.pth",
+    "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
 )
 transition.eval()
 
@@ -413,8 +400,8 @@ for k in range(nb_classes):
     )
     latent_safe_policies[k].eval()
 
-hdf5_file = "../data/sweeper/test/consolidated.h5"
-hdf5_file_const = "../data/sweeper/consolidated.h5"
+hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file_const = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,
     BL,

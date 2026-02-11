@@ -169,8 +169,6 @@ transition = VideoTransformer(
     dropout=0.1,
     nb_classes=3,
 ).to(device)
-# load_state_dict_flexible(transition, "../checkpoints_pa/encoder_0.1.pth")
-# load_state_dict_flexible(transition, "../checkpoints/best_testing.pth")
 
 transition.load_state_dict(torch.load("../checkpoints/best_testing.pth"), strict=False)
 transition.eval()

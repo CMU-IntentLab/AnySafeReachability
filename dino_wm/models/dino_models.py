@@ -287,7 +287,6 @@ class VideoTransformer(nn.Module):
         dropout: float = 0.0,
         emb_dropout: float = 0.0,
         device: str = "cuda",
-        nb_classes: int = 6,
     ):
         super().__init__()
 
@@ -351,47 +350,6 @@ class VideoTransformer(nn.Module):
             nn.ReLU(),
             nn.Linear(semantic_dim, 512),
         )
-
-        # self.semantic_encoder = nn.Sequential(
-        #     nn.LayerNorm(semantic_dim),
-        #     nn.Linear(semantic_dim, semantic_dim, bias=False),
-        #     nn.ReLU(inplace=True),
-        #     nn.Linear(semantic_dim, 512, bias=False),
-        # )
-
-        self.margin_head = nn.Sequential(
-            LayerNorm(semantic_dim),
-            nn.Linear(semantic_dim, semantic_dim),
-            nn.ReLU(),
-            nn.Linear(semantic_dim, 1),
-        )
-
-        self.multi_class_classifier = nn.Sequential(
-            LayerNorm(semantic_dim),
-            nn.Linear(semantic_dim, semantic_dim),
-            nn.ReLU(),
-            nn.Linear(semantic_dim, nb_classes),
-        )
-
-        # self.margin_head = nn.Sequential(
-        #     # CNN layers
-        #     # Input: [(N, T), D, H, W]
-        #     nn.Conv2d(total_dim, 256, kernel_size=5, padding=1),  # [(N, T), 256, H, W]
-        #     nn.ReLU(),
-        #     nn.Conv2d(256, 128, kernel_size=5, padding=1),  # [(N, T), 128, H, W]
-        #     nn.ReLU(),
-        #     nn.Conv2d(128, 32, kernel_size=5, padding=1),  # [(N, T), 32, H, W]
-        #     nn.ReLU(),
-        #     # MLP layers
-        #     nn.AdaptiveAvgPool2d(1),  # [(N, T), 32, 1, 1]
-        #     nn.Flatten(),  # [(N, T), 32]
-        #     nn.Linear(32, 256),  # [(N, T), 256], flatten_size = 32
-        #     nn.ReLU(),
-        #     nn.Linear(256, 1),  # [(N, T), 1]
-        # )
-
-        self.proxies = nn.Parameter(torch.randn(nb_classes, 512).cuda())
-        self.thresholds = nn.Parameter(torch.zeros(nb_classes), requires_grad=False)
 
     def forward(
         self,
@@ -524,28 +482,6 @@ class VideoTransformer(nn.Module):
         state_preds = self.state_head(features)
         state_preds = torch.mean(state_preds, dim=2)  # Average over patches
         return state_preds
-
-    def xy_pred(self, features):
-        # features = torch.mean(features, dim=-2)
-        xy_preds = self.xy_state_head(features)
-        xy_preds = torch.mean(xy_preds, dim=2)  # Average over patches
-        return xy_preds
-
-    def multi_class_pred(self, inp1, state):
-        features = torch.cat(  # [B T N (P + S)]
-            (
-                inp1,  # [B T N P]
-                einops.repeat(state, "b t s -> b t n s", n=inp1.shape[2]),  # [B T N S]
-            ),
-            dim=-1,
-        )
-        multi_class_preds = self.multi_class_classifier(features)
-        # Average over patches
-        # multi_class_preds: [B T nb_classes]
-        multi_class_preds = torch.mean(multi_class_preds, dim=2)
-        multi_class_preds = F.softmax(multi_class_preds, dim=-1)
-
-        return multi_class_preds
 
     @torch.no_grad()
     def get_dino_features(self, video: torch.Tensor) -> torch.Tensor:

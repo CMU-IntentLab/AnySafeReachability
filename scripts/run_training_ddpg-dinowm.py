@@ -61,7 +61,7 @@ wm = VideoTransformer(
 
 # wm.load_state_dict(
 #     torch.load(
-#         "/home/sunny/anysafe_project/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_mrg_0.1_num_ex_20.pth"
+#         "/home/sunny/anysafe_project/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_mrg_0.1_num_ex_20.pth"
 #     )
 # )
 if args.latent_safe:
@@ -74,14 +74,14 @@ if args.latent_safe:
 else:
     # wm.load_state_dict(
     #     torch.load(
-    #         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_priv_mrg_0.1.pth"
+    #         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv_mrg_0.1.pth"
     #     ),
     #     strict=False,
     # )
 
     load_state_dict_flexible(
         wm,
-        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_priv.pth",
+        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
     )
 # wm.load_state_dict(
 #     torch.load(

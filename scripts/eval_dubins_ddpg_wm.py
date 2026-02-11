@@ -122,7 +122,7 @@ config.num_actions = (
 )
 wm = models.WorldModel(env.observation_space_full, env.action_space, 0, config)
 
-ckpt_path = "logs/checkpoints_pa/encoder_task_dubins-wm.pth"
+ckpt_path = "logs/checkpoints_sem/encoder_task_dubins-wm.pth"
 wm.load_state_dict(torch.load(ckpt_path), strict=False)
 wm.eval()
 

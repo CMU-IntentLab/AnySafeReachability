@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader
 from tqdm import *
 from utils import load_state_dict_flexible
 
-from dino_wm.dino_models import VideoTransformer, select_xyyaw_from_state
-from dino_wm.test_loader import SplitTrajectoryDataset
+from dino_wm.models.dino_models import VideoTransformer, select_xyyaw_from_state
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend(
@@ -134,8 +134,7 @@ model = VideoTransformer(
     dropout=0.1,
     # nb_classes=nb_classes,
 ).to(device)
-load_state_dict_flexible(model, "../checkpoints_pa/encoder_priv.pth")
-# model.load_state_dict(torch.load("../checkpoints_pa/encoder_0.1.pth"))
+load_state_dict_flexible(model, "../checkpoints_sem/encoder_priv.pth")
 
 model.eval()
 X = []

@@ -16,9 +16,9 @@ from tqdm import *
 from utils import compare_kdes, load_state_dict_flexible
 
 import wandb
-from dino_wm.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
-from dino_wm.test_loader import SplitTrajectoryDataset
-from dino_wm.utils import PrivilegedTeacherForcingLoss
+from dino_wm.models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
+from dino_wm.utils.utils import PrivilegedTeacherForcingLoss
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend(
@@ -201,11 +201,8 @@ model = VideoTransformer(
     dropout=0.1,
     nb_classes=nb_classes,
 ).to(device)
-# model.load_state_dict(torch.load("../checkpoints/best_classifier.pth"), strict=False)
-# load_state_dict_flexible(model, "../checkpoints/best_classifier.pth")
-# load_state_dict_flexible(model, "../checkpoints/best_testing.pth")
+
 load_state_dict_flexible(model, "../checkpoints/best_testing.pth")
-# model.load_state_dict(torch.load("../checkpoints_pa/encoder_0.1.pth"))
 
 for name, param in model.named_parameters():
     param.requires_grad = name.startswith("semantic_encoder")
@@ -850,19 +847,11 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
 
         if args.save_model:
             model_name = wandb_name
-            save_name = f"../checkpoints_pa/encoder_{model_name}.pth"
-            best_save_name = f"../checkpoints_pa/best_encoder_{model_name}.pth"
+            save_name = f"../checkpoints_sem/encoder_{model_name}.pth"
+            # best_save_name = f"../checkpoints_sem/best_encoder_{model_name}.pth"
 
             torch.save(
                 model.state_dict(),
                 save_name,
             )
             tqdm.write(f"Model saved to {save_name}")
-
-            # if balanced_accuracy > best_eval:
-            #     best_eval = balanced_accuracy
-            #     print(f"New best at iter {i}, saving model to {best_save_name}.")
-            #     torch.save(
-            #         model.state_dict(),
-            #         best_save_name,
-            #     )

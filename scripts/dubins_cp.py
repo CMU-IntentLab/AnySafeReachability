@@ -115,7 +115,7 @@ config.num_actions = (
     env.action_space.n if hasattr(env.action_space, "n") else env.action_space.shape[0]
 )
 model = models.WorldModel(env.observation_space_full, env.action_space, 0, config)
-ckpt_path = "logs/checkpoints_pa/encoder_task_dubins-wm.pth"
+ckpt_path = "logs/checkpoints_sem/encoder_task_dubins-wm.pth"
 model.load_state_dict(torch.load(ckpt_path), strict=False)
 
 # model.load_state_dict(state_dict, strict=False)
