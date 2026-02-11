@@ -144,50 +144,6 @@ test_loader = DataLoader(
 
 device = "cuda:0"
 
-# labels is a tensor of shape (B, 2)
-x_class_boundaries = [0, 224 // 3, 224 * 2 // 3, 224]  # x boundaries for 3 classes
-y_class_boundaries = [224 // 3, 224 * 2 // 3, 224]  # y boundaries for 3 classes
-
-# 3 * 2 = 6 classes in total
-nb_classes = (len(x_class_boundaries) - 1) * (len(y_class_boundaries) - 1)
-label_to_str = {
-    0: "Left Top",
-    1: "Left Bottom",
-    2: "Middle Top",
-    3: "Middle Bottom",
-    4: "Right Top",
-    5: "Right Bottom",
-}
-cmap = plt.cm.rainbow
-class_to_colors = {i: cmap(i / nb_classes) for i in range(nb_classes)}
-
-
-def get_class_from_xy(labels):
-    assert labels.shape[-1] == 2, "Labels should have shape (B, 2)"
-    x_labels = torch.bucketize(
-        labels[..., 0], torch.tensor(x_class_boundaries, device=device)
-    ).unsqueeze(1)
-    y_labels = torch.bucketize(
-        labels[..., 1], torch.tensor(y_class_boundaries, device=device)
-    ).unsqueeze(1)
-
-    class_labels = (x_labels - 1) * (len(y_class_boundaries) - 1) + (y_labels - 1)
-    class_labels[torch.logical_or(x_labels <= 0, y_labels <= 0)] = -1
-    class_labels[
-        torch.logical_or(
-            labels[..., 0] < x_class_boundaries[0],
-            labels[..., 0] >= x_class_boundaries[-1],
-        )
-    ] = -1
-    class_labels[
-        torch.logical_or(
-            labels[..., 1] < y_class_boundaries[0],
-            labels[..., 1] >= y_class_boundaries[-1],
-        )
-    ] = -1
-
-    return class_labels
-
 
 model = VideoTransformer(
     image_size=(224, 224),
@@ -413,20 +369,12 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
             ],
         )
 
-        if args.loss in ["priv"]:
-            loss = criterion(
-                X=einops.rearrange(
-                    semantic_features.float(), "B T Z -> (B T) Z"
-                ).cuda(),
-                T=labels_gt[mask],
-            )
-        else:
-            loss = criterion(
-                X=einops.rearrange(
-                    semantic_features.float(), "B T Z -> (B T) Z"
-                ).cuda(),
-                T=labels_gt_xy_masked.squeeze().cuda(),
-            )
+        loss = criterion(
+            X=einops.rearrange(
+                semantic_features.float(), "B T Z -> (B T) Z"
+            ).cuda(),
+            T=labels_gt[mask],
+        )
 
         if args.use_unlabeled_data:
             wandb.log(
@@ -534,21 +482,12 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
                     semantic_features_norm, "B T Z -> B T 1 Z"
                 )  # (BS, T, 1, 512)
 
-                if args.loss in ["priv"]:
-                    loss = criterion(
-                        X=einops.rearrange(
-                            semantic_features.float(), "B T Z -> (B T) Z"
-                        ).cuda(),
-                        T=labels_gt[mask].squeeze().cuda(),
-                    )
-                else:
-                    loss = criterion(
-                        X=einops.rearrange(
-                            torch.tensor(semantic_features, device=device),
-                            "B T Z -> (B T) Z",
-                        ),
-                        T=torch.tensor(labels_gt_xy_masked, device=device).squeeze(),
-                    )
+                loss = criterion(
+                    X=einops.rearrange(
+                        semantic_features.float(), "B T Z -> (B T) Z"
+                    ).cuda(),
+                    T=labels_gt[mask].squeeze().cuda(),
+                )
 
                 losses_per_epoch.append(loss.detach().cpu().numpy())
 
@@ -785,12 +724,11 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
             # Scatter plot
             ax.scatter(cos_sim, dist, s=5, alpha=0.5)
 
-            if args.loss in ["priv"]:
-                y = np.linspace(0, dist.max(), 1000)
-                x = mapping_fn(y)
+            y = np.linspace(0, dist.max(), 1000)
+            x = mapping_fn(y)
 
-                # Plot the mapping function
-                ax.plot(x, y, color="red", linestyle="--", label="Mapping Function")
+            # Plot the mapping function
+            ax.plot(x, y, color="red", linestyle="--", label="Mapping Function")
             plt.tight_layout()
             wandb.log(
                 {
