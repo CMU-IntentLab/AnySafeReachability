@@ -265,29 +265,29 @@ class Dreamer(nn.Module):
                     neg = wm.heads["margin"](unsafe_dataset)
 
                     # semantic alignment
-                    # # feat: [B T F]
-                    # state = data["privileged_state"][:, :, :2]
-                    # state = einops.rearrange(state, "B T Z -> (B T) Z")  # [B*T, 2]
-                    # # semantic_feat: [B T E]
-                    # semantic_feat = self._wm.semantic_encoder(feat)
-                    # semantic_feat = einops.rearrange(
-                    #     semantic_feat, "B T Z -> (B T) Z"
-                    # )  # [B*T, E]
+                    # feat: [B T F]
+                    state = data["privileged_state"][:, :, :2]
+                    state = einops.rearrange(state, "B T Z -> (B T) Z")  # [B*T, 2]
+                    # semantic_feat: [B T E]
+                    semantic_feat = self._wm.semantic_encoder(feat)
+                    semantic_feat = einops.rearrange(
+                        semantic_feat, "B T Z -> (B T) Z"
+                    )  # [B*T, E]
 
-                    # diff = state.unsqueeze(0) - state.unsqueeze(1)  # [B*T, B*T, 2]
-                    # dists = torch.norm(diff, dim=2)
-                    # labels_gt = torch.clip(1 - 1 / (np.sqrt(2)) * dists, -1, 1)
+                    diff = state.unsqueeze(0) - state.unsqueeze(1)  # [B*T, B*T, 2]
+                    dists = torch.norm(diff, dim=2)
+                    labels_gt = torch.clip(1 - 1 / (np.sqrt(2)) * dists, -1, 1)
 
-                    # # Normalize all vectors for cosine similarity
-                    # semantic_features_norm = F.normalize(
-                    #     semantic_feat, dim=-1
-                    # )  # ((B*T), 512)
+                    # Normalize all vectors for cosine similarity
+                    semantic_features_norm = F.normalize(
+                        semantic_feat, dim=-1
+                    )  # ((B*T), 512)
 
-                    # # Compute cosine similarity via dot product → shape [B*T, B*T]
-                    # cos_sim = semantic_features_norm @ semantic_features_norm.T
+                    # Compute cosine similarity via dot product → shape [B*T, B*T]
+                    cos_sim = semantic_features_norm @ semantic_features_norm.T
 
-                    # # loss is MSE between labels gt and cosine similarity
-                    # semantic_loss = F.mse_loss(cos_sim, labels_gt).to(torch.float16)
+                    # loss is MSE between labels gt and cosine similarity
+                    semantic_loss = F.mse_loss(cos_sim, labels_gt).to(torch.float16)
 
                     gamma = self._config.gamma_lx
                     if pos.numel() > 0:

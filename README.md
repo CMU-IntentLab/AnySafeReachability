@@ -1,107 +1,102 @@
-<div align="center">
-    <h1>
-        <span style="color: #ff9500; font-style: italic; font-weight: bold;">
-            AnySafe:
-        </span>
-        Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space (ICRA, 2026)
-    </h1>
-    <a href="https://any-safe.github.io/">Homepage</a>
-    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-    <a href="https://arxiv.org/abs/2509.19555">Paper</a>
-    <!-- <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-    <a href="[VIDEO URL]">Video</a> -->
-    <br />
-</div>
+# 🏎️ Dubins Car
 
----
 
-This is the official repository for [**AnySafe: Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space**](https://any-safe.github.io/).
+## 📦 Installation
 
-<p align="center">
- <img width="1200" src="main.png" style="background-color:white;" alt="Flow Diagram">
-</p>
-
----
-
-## Code Structure
-
-```bash
-git clone https://github.com/CMU-IntentLab/AnySafeReachability.git
-cd AnySafeReachability
-```
-
-The project is organized into separate branches:
-
-* **`dubins`**: 3D Dubins Car. [Link]()
-
-```bash
-git checkout dubins
-```
-
-* **`franka`**: Implementation for real world experiment with Franka Panda arm. [Link]()
-
-```bash
-git checkout franka
-```
-
-This repository provides the implementation of **Constraint-Conditioned Latent Safety Filters** for adapting safety behavior at runtime in robotics tasks both in simulation and hardware.
-
----
-
-## Installation
+We recommend using [Miniconda](https://docs.conda.io/en/latest/miniconda.html) to manage dependencies.
 
 ```bash
 # Clone the repository
 git clone https://github.com/CMU-IntentLab/AnySafeReachability.git
-git checkout franka
-cd AnySafe Reachability
+git checkout dubins
+cd AnySafeReachability
 
-# Create and activate the conda environment
-conda env create -f environment.yaml
+# Create and activate conda environment
+conda env create -f environment.yml
 conda activate anysafe
 ```
 
----
+## 🗂️ Dataset Generation
 
+Generate synthetic expert and random trajectory data for training the world model.
 
-## Quick Start: Download Pretrained Models and Dataset
-You can download pretrained models: [pretrained models](LINK).
 ```bash
-# Download pretrained world model
-gdown LINK
-
-# Download pretrained constraint-conditioned filter
-
-# This will create:
-# - dreamer.pt (pretrained world model)
-# - filter/ (reachability filter directory)
-#   └── model/ (filter checkpoints at different training steps)
+python scripts/generate_data_traj_cont.py
 ```
 
-## Train World Model
-You can download the pre-collected dataset for the "Sweeper" task: [sweeper dataset](LINK).
+Generates ... file.
+
+
+## 🧠 World Model Training
+
+Train the latent dynamics world model using the generated dataset.
+
 ```bash
-# Download sweeper dataset
+python scripts/dreamer_offline.py
+```
+
+Produces ... file.
+
+Download pre-trained world model...
+```bash
 pip install gdown
-gdown LINK
-unzip pretrained_models.zip
+gdown ...
 ```
 
-1. Train decoder
+
+## 🛡️ Constraint-Conditioned Latent Reachability Analysis
+
+Run RL for constraint-conditioned latent-space reachability:
+
 ```bash
-python train_dino_decoder.py
+python scripts/run_training_ddpg-wm.py 
 ```
-The best decoder model is saved as `checkpoints/testing_decoder.pth`
 
-2. Train transistion model
+## 📊 Evaluation Tools
+
+Run for analyzing world model
 ```bash
-python train_dino_wm.py
+python scripts/wm_analysis.py 
 ```
-The best transistion model is saved as `checkpoints/best_testing.pth`
 
-
-## Train Semantic Encoder
+## ⚖️ Baselines
+For Privileged Safe:
 ```bash
-python dino_wm/train_failure_classifier.py
+# Reachability training
+python scripts/run_training_sac_nodist.py # Generates ... file
+
+# Evaluation
+python scripts/eval_dubins_sac.py
 ```
-The best transistion model is saved as `checkpoints_sem/encoder_{model_name}.pth`
+
+For Latent Safe:
+```bash
+# Follow dataset generation and WM training from above
+
+# Reachability training
+python scripts/run_training_ddpg_wm.py --env-dist-type v --safety-margin-type learned --safety-margin-threshold 0
+```
+
+
+## 🙏 Acknowledgements
+
+This implementation builds on the following open-source projects:
+
+1. [dreamerv3-pytorch](https://github.com/NM512/dreamerv3-torch)
+2. [HJReachability](https://github.com/HJReachability/safety_rl/)
+3. [latent-safety](https://github.com/CMU-IntentLab/latent-safety.git)
+4. [UNISafe](https://github.com/CMU-IntentLab/UNISafe.git)
+
+If you build upon this work, please consider citing our research.
+
+
+📄 Citation
+
+```
+@article{agrawal2025anysafe,
+  title={AnySafe: Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space},
+  author={Agrawal, Sankalp and Seo, Junwon and Nakamura, Kensuke and Tian, Ran and Bajcsy, Andrea},
+  journal={arXiv preprint arXiv:2509.19555},
+  year={2025}
+}
+```
