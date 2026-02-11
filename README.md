@@ -102,6 +102,6 @@ The best transistion model is saved as `checkpoints/best_testing.pth`
 
 ## Train Semantic Encoder
 ```bash
-python train_dino_wm.py
+python dino_wm/train_failure_classifier.py
 ```
-The best transistion model is saved as `checkpoints/best_testing.pth`
+The best transistion model is saved as `checkpoints_sem/encoder_{model_name}.pth`

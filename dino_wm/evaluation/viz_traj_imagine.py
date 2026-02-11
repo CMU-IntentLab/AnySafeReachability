@@ -178,7 +178,7 @@ if __name__ == "__main__":
         num_frames=BL - 1,
         dropout=0.1,
     ).to(device)
-    # load_state_dict_flexible(transition, "../checkpoints_pa/encoder_0.1.pth")
+    # load_state_dict_flexible(transition, "../checkpoints_sem/encoder_0.1.pth")
     # load_state_dict_flexible(transition, "../checkpoints/best_testing.pth")
 
     transition.load_state_dict(torch.load("../checkpoints/best_classifier.pth"))

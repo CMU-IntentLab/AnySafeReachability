@@ -557,18 +557,11 @@ if __name__ == "__main__":
         dropout=0.1,
         nb_classes=nb_classes,
     ).to(device)
-    # load_state_dict_flexible(
-    #     transition,
-    #     "../checkpoints_pa/encoder_mrg_0.1_alpha_32_num_ex_all_ul_F.pth",
-    # )
+
     load_state_dict_flexible(
         transition,
-        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_pa/encoder_priv.pth",
+        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
     )
-    # load_state_dict_flexible(
-    #     transition,
-    #     "../checkpoints_pa/encoder_npair_mrg_0.1.pth",
-    # )
 
     # nb_classes = transition.proxies.shape[0]
     # load_state_dict_flexible(transition, "../checkpoints/best_testing.pth")

@@ -1,14 +1,18 @@
+'''
+Used for training latent safe classifiers.
+'''
+
 import random
 import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from dino_decoder import VQVAE
-from dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from models.dino_decoder import VQVAE
+from models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
 from einops import rearrange
 from sklearn.metrics import balanced_accuracy_score
-from test_loader import SplitTrajectoryDataset
+from utils.test_loader import SplitTrajectoryDataset
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -113,7 +117,7 @@ if __name__ == "__main__":
         f"Class number must be between 0 and {nb_classes - 1}."
     )
     print(f"Training for class: {_class}")
-    wandb.init(project="Latent Safe", name=f"Classifier Class {_class} DINO")
+    wandb.init(project="Latent Safe", name=f"Cl`assifier Class {_class} DINO")
 
     use_amp = True
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
@@ -163,7 +167,6 @@ if __name__ == "__main__":
         mlp_dim=2048,
         num_frames=BL - 1,
         dropout=0.1,
-        nb_classes=nb_classes,
     ).to(device)
     load_state_dict_flexible(
         transition,
