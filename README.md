@@ -78,7 +78,8 @@ gdown LINK
 #   └── model/ (filter checkpoints at different training steps)
 ```
 
-## Train World Model
+# Full AnySafe Pipeline
+## Step 1: Train World Model
 You can download the pre-collected dataset for the "Sweeper" task: [sweeper dataset](LINK).
 ```bash
 # Download sweeper dataset
@@ -100,8 +101,20 @@ python train_dino_wm.py
 The best transistion model is saved as `checkpoints/best_testing.pth`
 
 
-## Train Semantic Encoder
+## Step 2: Train Semantic Encoder
 ```bash
 python dino_wm/train_failure_classifier.py
 ```
 The best transistion model is saved as `checkpoints_sem/encoder_{model_name}.pth`
+
+## Step 3: Constraint-Conditioned Reachability
+```bash
+python scripts/run_training_ddpg-dinowm.py
+```
+
+## Step 4: Conformal Prediction
+```bash
+python scripts/sweeper_cp.py
+```
+
+## Evaluation Tools
