@@ -23,7 +23,7 @@ This is the official repository for [**AnySafe: Adapting Latent Safety Filters a
 
 ---
 
-## Code Structure
+## 🗂️ Code Structure
 
 ```bash
 git clone https://github.com/CMU-IntentLab/AnySafeReachability.git
@@ -48,7 +48,7 @@ This repository provides the implementation of **Constraint-Conditioned Latent S
 
 ---
 
-## Installation
+## 💻 Installation
 
 ```bash
 # Clone the repository
@@ -64,7 +64,7 @@ conda activate anysafe
 ---
 
 # Full AnySafe Pipeline
-## Step 1: Train World Model
+## 🌍 Step 1: Train World Model
 1. Train decoder
 ```bash
 python train_dino_decoder.py
@@ -77,7 +77,7 @@ python train_dino_wm.py
 ```
 The best transistion model is saved as `checkpoints/best_testing.pth`
 
-## Step 2: Train Semantic Encoder
+## 🧩 Step 2: Train Semantic Encoder
 ```bash
 python dino_wm/train_failure_classifier.py
 ```
@@ -90,17 +90,17 @@ pip install gdown
 gdown LINK
 ```
 
-## Step 3: Constraint-Conditioned Reachability
+## 🛡️ Step 3: Constraint-Conditioned Reachability
 ```bash
 python scripts/run_training_ddpg-dinowm.py # save policy
 ```
 
-## Step 4: Conformal Prediction
+## 🎯 Step 4: Conformal Prediction
 ```bash
 python scripts/sweeper_cp.py
 ```
 
-## Evaluation Tools
+## 📈 Evaluation Tools
 Coming soon!
 
 
