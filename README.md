@@ -91,7 +91,7 @@ python scripts/eval_dubins_ddpg_wm.py # Saves results as metrics.txt
 For Privileged Safe:
 ```bash
 # Reachability training
-python scripts/run_training_sac_nodist.py # Generates ... file
+python scripts/run_training_sac_nodist.py
 
 # Evaluation
 python scripts/eval_dubins_sac.py
@@ -116,7 +116,6 @@ This implementation builds on the following open-source projects:
 4. [UNISafe](https://github.com/CMU-IntentLab/UNISafe.git)
 
 If you build upon this work, please consider citing our research.
-
 
 📄 Citation
 
