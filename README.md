@@ -63,21 +63,6 @@ conda activate anysafe
 
 ---
 
-
-## Quick Start: Download Pretrained Models and Dataset
-You can download pretrained models: [pretrained models](LINK).
-```bash
-# Download pretrained world model
-gdown LINK
-
-# Download pretrained constraint-conditioned filter
-
-# This will create:
-# - dreamer.pt (pretrained world model)
-# - filter/ (reachability filter directory)
-#   └── model/ (filter checkpoints at different training steps)
-```
-
 # Full AnySafe Pipeline
 ## Step 1: Train World Model
 You can download the pre-collected dataset for the "Sweeper" task: [sweeper dataset](LINK).
@@ -118,3 +103,26 @@ python scripts/sweeper_cp.py
 ```
 
 ## Evaluation Tools
+
+
+## 🙏 Acknowledgements
+
+This implementation builds on the following open-source projects:
+
+1. [dreamerv3-pytorch](https://github.com/NM512/dreamerv3-torch)
+2. [HJReachability](https://github.com/HJReachability/safety_rl/)
+3. [latent-safety](https://github.com/CMU-IntentLab/latent-safety.git)
+4. [UNISafe](https://github.com/CMU-IntentLab/UNISafe.git)
+
+If you build upon this work, please consider citing our research.
+
+📄 Citation
+
+```
+@article{agrawal2025anysafe,
+  title={AnySafe: Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space},
+  author={Agrawal, Sankalp and Seo, Junwon and Nakamura, Kensuke and Tian, Ran and Bajcsy, Andrea},
+  journal={arXiv preprint arXiv:2509.19555},
+  year={2025}
+}
+```
