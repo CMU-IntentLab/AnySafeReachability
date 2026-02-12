@@ -8,8 +8,8 @@
     <a href="https://any-safe.github.io/">Homepage</a>
     <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
     <a href="https://arxiv.org/abs/2509.19555">Paper</a>
-    <!-- <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-    <a href="[VIDEO URL]">Video</a> -->
+    <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+    <a href="https://www.youtube.com/watch?v=PzxOX85zkF4">Video</a>
     <br />
 </div>
 
