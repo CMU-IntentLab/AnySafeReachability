@@ -123,7 +123,7 @@ If you build upon this work, please consider citing our research.
 @article{agrawal2025anysafe,
   title={AnySafe: Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space},
   author={Agrawal, Sankalp and Seo, Junwon and Nakamura, Kensuke and Tian, Ran and Bajcsy, Andrea},
-  journal={arXiv preprint arXiv:2509.19555},
-  year={2025}
+  journal={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2026}
 }
 ```
