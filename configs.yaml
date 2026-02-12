@@ -169,7 +169,7 @@ defaults:
 
   env-dist-type: ds # 'v' - vanilla, 'fc' - four corners, 'fcfe' - four corners four edges, 'rh' - right half, 'br' - big radii, 'uni' - uniform, 'rhfe' - right half four edges, 'rhbr' - right half big radii, 'ds' - dataset
   safety-margin-type: 'cos_sim' # cos_sim, learned
-  safety-margin-threshold: -0.64 # type=float, default=0.5)
+  safety-margin-threshold: -0.642 # type=float, default=0.5)
   safety-margin-hard-threshold: False # type=bool, default=False)
   pass-prototype: False # type=bool, default=False) # whether to pass a prototype to the policy net, not the raw constraint
 

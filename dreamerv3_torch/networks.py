@@ -2,7 +2,7 @@ import math
 import re
 
 import numpy as np
-import tools
+from . import tools
 import torch
 import torch.nn.functional as F
 from torch import distributions as torchd

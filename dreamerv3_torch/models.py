@@ -1,7 +1,6 @@
 import copy
 
-import networks
-import tools
+from . import networks, tools
 import torch
 from torch import nn
 

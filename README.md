@@ -38,7 +38,7 @@ Train the latent dynamics world model using the generated dataset.
 python scripts/dreamer_offline.py
 ```
 
-Produces ... file.
+Produces **`rssm_ckpt.pt`** file.
 
 Download pre-trained world model...
 ```bash
@@ -46,13 +46,19 @@ pip install gdown
 gdown ...
 ```
 
+## 🏋️ Train semantic encoder
+
+```bash
+python scripts/train_failure_classifier_sem_dubins.py
+```
+Produces **`encoder_task_dubins-wm.pth.pt`** file.
 
 ## 🛡️ Constraint-Conditioned Latent Reachability Analysis
 
 Run RL for constraint-conditioned latent-space reachability:
 
 ```bash
-python scripts/run_training_ddpg-wm.py 
+python scripts/run_training_ddpg_wm.py 
 ```
 
 Download pre-trained filter...
@@ -73,12 +79,12 @@ Update desired value in **`configs.yaml`**
 
 Run for analyzing world model
 ```bash
-python scripts/wm_analysis.py 
+python scripts/wm_analysis.py # Creates wandb run with visualizations
 ```
 
 Evaluate value funtion and policy
 ```bash
-python scripts/eval_dubins_ddpg_wm.py 
+python scripts/eval_dubins_ddpg_wm.py # Saves results as metrics.txt
 ```
 
 ## ⚖️ Baselines

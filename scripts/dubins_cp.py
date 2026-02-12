@@ -15,16 +15,14 @@ import torch.nn.functional as F
 # note: need to include the dreamerv3 repo for this
 from termcolor import cprint
 
-import PyHJ
+project_root = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(project_root)  # AnySafeReachability
+sys.path.insert(0, project_root)
 
-dreamer_dir = os.path.abspath("/home/sunny/AnySafe_Reachability/dreamerv3_torch")
-sys.path.append(dreamer_dir)
-saferl_dir = os.path.abspath("/home/sunny/AnySafe_Reachability/PyHJ")
-sys.path.append(saferl_dir)
 print(sys.path)
-import models
-import tools
-from dreamer import make_dataset
+import PyHJ
+from dreamerv3_torch import models, tools
+from dreamerv3_torch.dreamer import make_dataset
 
 # note: need to include the dreamerv3 repo for this
 from tqdm import *
@@ -75,7 +73,7 @@ def get_args():
         assert config.expt_name, "Need to provide experiment name to resume run."
 
     yml = yaml.YAML(typ="safe", pure=True)
-    with open("/home/sunny/AnySafe_Reachability/configs.yaml", "r") as f:
+    with open("configs.yaml", "r") as f:
         configs = yml.load(f)
 
     name_list = ["defaults", *config.configs] if config.configs else ["defaults"]

@@ -27,12 +27,11 @@ import io
 import pathlib
 from datetime import datetime
 
-import models
+from dreamerv3_torch import models, tools
 import ruamel.yaml as yaml
-import tools
 
 # note: need to include the dreamerv3 repo for this
-from dreamer import make_dataset
+from dreamerv3_torch.dreamer import make_dataset
 from generate_data_traj_cont import get_frame
 from PIL import Image
 from termcolor import cprint
@@ -256,9 +255,10 @@ epoch_id = 6
 
 state_type = "z_sem" if args.pass_semantic_state else "z"
 constraint_type = "z_c_sem" if args.pass_semantic_constraint else "z_c"
+policy_path = os.path.join(f"logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}/policy.pth")
 policy.load_state_dict(
     torch.load(
-        f"/home/sunny/AnySafe_Reachability/scripts/logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}/policy.pth"
+        policy_path
     )
 )
 
@@ -356,6 +356,7 @@ for in_dist in [True]:
             policy=policy,
             in_distribution=in_dist,
         )
+        os.makedirs("results", exist_ok=True)
         plot1.savefig(f"results/plot_{i}.png", dpi=300, bbox_inches="tight")
 
     all_metrics = []
@@ -450,7 +451,7 @@ import imageio
 
 imageio.mimsave("output.mp4", video_frames, fps=20)
 
-save_path = f"scripts/logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}"
+save_path = f"logs/dreamer_dubins/PyHJ/sim_{args.safety_margin_type}_dist_type_{args.env_dist_type}_V({state_type}, {constraint_type})_const_embd_{args.constraint_embedding_dim}/epoch_id_{epoch_id}"
 with open(f"{save_path}/metrics.txt", "w") as f:
     for key, value in aggregate_metrics.items():
         f.write(f"{key}: {value}\n")

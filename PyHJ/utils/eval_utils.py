@@ -14,7 +14,8 @@ def find_a(obs, policy):
         tmp_obs = obs
     tmp_batch = Batch(obs=tmp_obs, info=Batch())
     tmp = policy(tmp_batch, model="actor_old").act
-    act = policy.map_action(tmp).cpu().detach().numpy().flatten()
+    # act = policy.map_action(tmp).cpu().detach().numpy().flatten()
+    act = policy.map_action(tmp).flatten()
     return act
 
 

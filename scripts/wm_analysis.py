@@ -1,7 +1,6 @@
 import argparse
 import os
 import pickle
-import sys
 
 import einops
 import gymnasium  # as gym
@@ -10,6 +9,10 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import f1_score
 
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import PyHJ
 import wandb
 from PyHJ.utils import WandbLogger
@@ -29,12 +32,11 @@ import pathlib
 from datetime import datetime
 
 import matplotlib.pyplot as plt
-import models
+from dreamerv3_torch import models, tools
 import ruamel.yaml as yaml
-import tools
 
 # note: need to include the dreamerv3 repo for this
-from dreamer import make_dataset
+from dreamerv3_torch.dreamer import make_dataset
 from generate_data_traj_cont import get_frame
 from PIL import Image
 from termcolor import cprint
@@ -96,7 +98,7 @@ def get_args():
         parser.add_argument(f"--{key}", type=arg_type, default=arg_type(value))
     final_config = parser.parse_args(remaining)
 
-    final_config.logdir = f"{final_config.logdir + '/PyHJ'}/{config.expt_name}"
+    final_config.logdir = f"{final_config.logdir}"
     # final_config.time_limit = HORIZONS[final_config.task.split("_")[-1]]
 
     print("---------------------")
@@ -113,6 +115,10 @@ args = get_args()
 config = args
 config.grid_size = 2
 config.nb_classes = config.grid_size**2 + 1
+
+log_path = os.path.join(
+    args.logdir + "/PyHJ", args.task, f"wm_dist_type_{args.env_dist_type}"
+)
 
 env = gymnasium.make(args.task, params=[config])
 config.num_actions = (
@@ -143,25 +149,6 @@ offline_dataset = make_dataset(offline_eps, config)
 
 env.set_wm(wm, offline_dataset, config)
 
-log_path = os.path.join(
-    args.logdir + "/PyHJ",
-    args.task,
-    "wm_actor_activation_{}_critic_activation_{}_game_gd_steps_{}_tau_{}_training_num_{}_buffer_size_{}_c_net_{}_{}_a1_{}_{}_gamma_{}".format(
-        args.actor_activation,
-        args.critic_activation,
-        args.actor_gradient_steps,
-        args.tau,
-        args.training_num,
-        args.buffer_size,
-        args.critic_net[0],
-        len(args.critic_net),
-        args.control_net[0],
-        len(args.control_net),
-        args.gamma_pyhj,
-    ),
-)
-
-
 def fig_to_image(fig):
     buf = io.BytesIO()
     fig.savefig(buf, format="png")
@@ -175,6 +162,7 @@ def make_cache(config, thetas):
     cache = {}
 
     cache_file = os.path.join(log_path, "cache.pkl")
+    print("Checking for cache file at", cache_file)
 
     if os.path.exists(cache_file):
         with open(cache_file, "rb") as f:
@@ -215,6 +203,7 @@ def make_cache(config, thetas):
 
     # pickle file
     cache_file = os.path.join(log_path, "cache.pkl")
+    os.makedirs(os.path.dirname(cache_file), exist_ok=True)
     with open(cache_file, "wb") as f:
         pickle.dump(cache, f)
 
@@ -527,7 +516,7 @@ def topographic_map_proxies(
     return fig
 
 
-thetas = [0, np.pi / 6, np.pi / 3, np.pi / 2, np.pi, 3 * np.pi / 2]
+thetas = [3 * np.pi / 2, 7 * np.pi / 4, 0, np.pi / 4, np.pi / 2, np.pi]
 cache = make_cache(config, thetas)
 logger = None
 warmup = 1

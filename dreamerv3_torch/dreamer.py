@@ -11,9 +11,8 @@ import ruamel.yaml as yaml
 
 sys.path.append(str(pathlib.Path(__file__).parent))
 
-import exploration as expl
-import models
-import tools
+from . import exploration as expl
+from . import models, tools
 import envs.wrappers as wrappers
 from parallel import Parallel, Damy
 

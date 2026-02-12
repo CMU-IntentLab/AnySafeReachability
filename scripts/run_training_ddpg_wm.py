@@ -29,12 +29,11 @@ import io
 import pathlib
 from datetime import datetime
 
-import models
-import ruamel.yaml as yaml
-import tools
+from dreamerv3_torch import models, tools
+import ruamel.yaml as yaml 
 
 # note: need to include the dreamerv3 repo for this
-from dreamer import make_dataset
+from dreamerv3_torch.dreamer import make_dataset
 from generate_data_traj_cont import get_frame
 from PIL import Image
 from termcolor import cprint
@@ -119,7 +118,6 @@ def get_args():
 
 args = get_args()
 config = args
-config.nb_classes = 5
 
 
 env = gymnasium.make(args.task, params=[config])
@@ -573,16 +571,16 @@ for iter in range(warmup + args.total_episodes):
             },
         )
 
-    traj_imgs = env.get_trajectory(policy=policy)
-    wandb.log(
-        {
-            "trajectory": wandb.Video(
-                np.array(traj_imgs),
-                fps=10,
-                format="mp4",
-            ),
-            "num_epochs": epoch - 1,
-        }
-    )
+    # traj_imgs = env.get_trajectory(policy=policy)
+    # wandb.log(
+    #     {
+    #         "trajectory": wandb.Video(
+    #             np.array(traj_imgs),
+    #             fps=10,
+    #             format="mp4",
+    #         ),
+    #         "num_epochs": epoch - 1,
+    #     }
+    # )
 
     plt.close()
