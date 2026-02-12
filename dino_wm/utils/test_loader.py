@@ -17,7 +17,7 @@ class SplitTrajectoryDataset(Dataset):
         num_test=100,
         provide_labels=True,
         num_examples_per_class=None,
-        only_pass_labeled_examples=False,
+        only_pass_labeled_examples=True,
         xy_to_class_label_fn=None,
     ):
         """

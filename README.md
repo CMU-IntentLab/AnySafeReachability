@@ -65,14 +65,6 @@ conda activate anysafe
 
 # Full AnySafe Pipeline
 ## Step 1: Train World Model
-You can download the pre-collected dataset for the "Sweeper" task: [sweeper dataset](LINK).
-```bash
-# Download sweeper dataset
-pip install gdown
-gdown LINK
-unzip pretrained_models.zip
-```
-
 1. Train decoder
 ```bash
 python train_dino_decoder.py
@@ -85,16 +77,22 @@ python train_dino_wm.py
 ```
 The best transistion model is saved as `checkpoints/best_testing.pth`
 
-
 ## Step 2: Train Semantic Encoder
 ```bash
 python dino_wm/train_failure_classifier.py
 ```
-The best transistion model is saved as `checkpoints_sem/encoder_{model_name}.pth`
+The best transistion model is saved as `checkpoints_sem/encoder_priv.pth`
+
+You can download the pre-trained world model for the "Sweeper" task: [sweeper model](LINK).
+```bash
+# Download sweeper world model with semantic encoder
+pip install gdown
+gdown LINK
+```
 
 ## Step 3: Constraint-Conditioned Reachability
 ```bash
-python scripts/run_training_ddpg-dinowm.py
+python scripts/run_training_ddpg-dinowm.py # save policy
 ```
 
 ## Step 4: Conformal Prediction
@@ -103,6 +101,7 @@ python scripts/sweeper_cp.py
 ```
 
 ## Evaluation Tools
+Coming soon!
 
 
 ## 🙏 Acknowledgements
@@ -122,7 +121,7 @@ If you build upon this work, please consider citing our research.
 @article{agrawal2025anysafe,
   title={AnySafe: Adapting Latent Safety Filters at Runtime via Safety Constraint Parameterization in the Latent Space},
   author={Agrawal, Sankalp and Seo, Junwon and Nakamura, Kensuke and Tian, Ran and Bajcsy, Andrea},
-  journal={arXiv preprint arXiv:2509.19555},
-  year={2025}
+  journal={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2026}
 }
 ```

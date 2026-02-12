@@ -9,10 +9,6 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import *
-from utils import load_state_dict_flexible
-
-from dino_wm.models.dino_models import VideoTransformer, select_xyyaw_from_state
-from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend(
@@ -20,6 +16,10 @@ sys.path.extend(
         base_dir,
     ]
 )
+
+from dino_wm.utils.utils import load_state_dict_flexible
+from dino_wm.models.dino_models import VideoTransformer, select_xyyaw_from_state
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 seed = 1
 random.seed(seed)
@@ -93,20 +93,9 @@ if args.gpu_id != -1:
 BS = args.sz_batch  # batch size
 BL = 1
 
-hdf5_file = "/home/sunny/data/sweeper/train/consolidated.h5"
-hdf5_file_test = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
+hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
 
-if args.use_unlabeled_data:
-    train_data_unlabeled = SplitTrajectoryDataset(
-        hdf5_file,
-        BL,
-        split="train",
-        num_test=0,
-        provide_labels=False,  # Unlabeled data
-        num_examples_per_class=int(args.num_examples_per_class * args.unlabeled_ratio)
-        if args.unlabeled_ratio != -1.0
-        else None,
-    )
 test_data = SplitTrajectoryDataset(
     hdf5_file_test,
     BL,
@@ -134,7 +123,7 @@ model = VideoTransformer(
     dropout=0.1,
     # nb_classes=nb_classes,
 ).to(device)
-load_state_dict_flexible(model, "../checkpoints_sem/encoder_priv.pth")
+load_state_dict_flexible(model, "dino_wm/checkpoints_sem/encoder_priv.pth")
 
 model.eval()
 X = []

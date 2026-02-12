@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
 
-from dino_wm.dino_models import normalize_acs, select_xyyaw_from_state
+from dino_wm.models.dino_models import normalize_acs, select_xyyaw_from_state
 
 
 class Franka_DINOWM_Env(gym.Env):
@@ -66,9 +66,6 @@ class Franka_DINOWM_Env(gym.Env):
         self._reset_loader()
 
     def step(self, action):
-        import ipdb
-
-        ipdb.set_trace()
         ac_torch = torch.tensor([[action]], dtype=torch.float32).to(
             self.device
         )  # *self.scalar

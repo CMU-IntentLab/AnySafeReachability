@@ -14,8 +14,8 @@ from torchvision import transforms
 from tqdm import tqdm
 
 # Import custom modules
-from dino_wm.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
-from dino_wm.test_loader import SplitTrajectoryDataset
+from dino_wm.models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
@@ -320,7 +320,7 @@ transition = VideoTransformer(
 
 load_state_dict_flexible(
     transition,
-    "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
+    "dino_wm/checkpoints_sem/encoder_priv.pth",
 )
 transition.eval()
 
@@ -329,7 +329,7 @@ latent_safe_classifiers = {k: copy.deepcopy(transition) for k in range(nb_classe
 for k in range(nb_classes):
     load_state_dict_flexible(
         latent_safe_classifiers[k],
-        f"/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_latent_safe/class_{k}_best_classifier_dino.pth",
+        f"dino_wm/checkpoints_latent_safe/class_{k}_best_classifier_dino.pth",
     )
     latent_safe_classifiers[k].eval()
 
@@ -387,7 +387,7 @@ policy = DDPGPolicy(
 )
 policy.load_state_dict(
     torch.load(
-        "/home/sunny/AnySafe_Reachability/scripts/logs/dinowm/epoch_id_16/rotvec_policy_priv.pth"
+        "logs/dinowm/epoch_id_16/rotvec_policy_priv.pth"
     )
 )
 
@@ -396,11 +396,11 @@ latent_safe_policies = {k: latent_safe_policy() for k in range(nb_classes)}
 for k in range(nb_classes):
     load_state_dict_flexible(
         latent_safe_policies[k],
-        f"/home/sunny/AnySafe_Reachability/scripts/logs/dinowm/latent_safe/class_{k}/epoch_id_26/rotvec_policy_class_{k}.pth",
+        f"logs/dinowm/latent_safe/class_{k}/epoch_id_26/rotvec_policy_class_{k}.pth",
     )
     latent_safe_policies[k].eval()
 
-hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
 hdf5_file_const = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,

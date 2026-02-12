@@ -13,12 +13,11 @@ import umap.umap_ as umap
 from scipy.stats import gaussian_kde
 from torch.utils.data import DataLoader, Subset
 from tqdm import *
-from utils import compare_kdes, load_state_dict_flexible
+from utils.utils import compare_kdes, load_state_dict_flexible, PrivilegedTeacherForcingLoss
 
 import wandb
-from dino_wm.models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
-from dino_wm.utils.test_loader import SplitTrajectoryDataset
-from dino_wm.utils.utils import PrivilegedTeacherForcingLoss
+from models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from utils.test_loader import SplitTrajectoryDataset
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend(
@@ -102,30 +101,16 @@ if args.gpu_id != -1:
 BS = args.sz_batch  # batch size
 BL = 1
 
-hdf5_file = "/home/sunny/data/sweeper/train/consolidated.h5"
-hdf5_file_test = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
+hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
 
 train_data_labeled = SplitTrajectoryDataset(
     hdf5_file,
     BL,
     split="train",
     num_test=0,
-    provide_labels=True,  # Labeled data
-    num_examples_per_class=args.num_examples_per_class,
-    only_pass_labeled_examples=True,
 )
 
-if args.use_unlabeled_data:
-    train_data_unlabeled = SplitTrajectoryDataset(
-        hdf5_file,
-        BL,
-        split="train",
-        num_test=0,
-        provide_labels=False,  # Unlabeled data
-        num_examples_per_class=int(args.num_examples_per_class * args.unlabeled_ratio)
-        if args.unlabeled_ratio != -1.0
-        else None,
-    )
 test_data = SplitTrajectoryDataset(
     hdf5_file_test,
     BL,
@@ -155,10 +140,9 @@ model = VideoTransformer(
     mlp_dim=2048,
     num_frames=3,
     dropout=0.1,
-    nb_classes=nb_classes,
 ).to(device)
 
-load_state_dict_flexible(model, "../checkpoints/best_testing.pth")
+load_state_dict_flexible(model, "dino_wm/checkpoints/best_testing.pth")
 
 for name, param in model.named_parameters():
     param.requires_grad = name.startswith("semantic_encoder")
@@ -228,7 +212,7 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
         train_loader_labeled = DataLoader(
             subset, batch_size=BS, shuffle=True, num_workers=args.nb_workers
         )
-    elif (  # If small dataset and using unlabeled data
+    elif (  # If small dataset
         total_timesteps < min_timesteps
     ):
         # Step 1: Include all original samples once
@@ -240,36 +224,6 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
 
         train_loader_labeled = DataLoader(
             bootstrapped_subset,
-            batch_size=BS,
-            shuffle=True,
-            num_workers=args.nb_workers,
-        )
-
-    if (  # If using full dataset
-        args.use_unlabeled_data and args.unlabeled_ratio == -1.0
-    ):
-        if args.ratio_schedule == "const":
-            num_to_sample = max_timesteps
-        elif args.ratio_schedule == "lin":
-            num_to_sample = (max_timesteps * epoch / args.nb_epochs).astype(int)
-        elif args.ratio_schedule == "exp":
-            num_to_sample = (
-                max_timesteps * np.exp(-5 * (1 - epoch / args.nb_epochs) ** 2)
-            ).astype(int)
-        else:
-            raise ValueError("Invalid ratio schedule: {}".format(args.ratio_schedule))
-        subset_indices_unlabeled = random.sample(
-            range(len(train_data_unlabeled)),
-            num_to_sample,
-        )
-        subset_unlabeled = Subset(train_data_unlabeled, subset_indices_unlabeled)
-        train_loader_unlabeled = DataLoader(
-            subset_unlabeled, batch_size=BS, shuffle=True, num_workers=args.nb_workers
-        )
-
-    elif args.use_unlabeled_data and args.unlabeled_ratio != -1.0:
-        train_loader_unlabeled = DataLoader(
-            dataset=train_data_unlabeled,
             batch_size=BS,
             shuffle=True,
             num_workers=args.nb_workers,
@@ -316,41 +270,6 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
 
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=True):
             semantic_features = model.semantic_embed(inp1=inputs1, state=states)
-            if args.use_unlabeled_data:  # and epoch >= 20:
-                semantic_features_unlabeled_tensor = []
-                for idx, data_unlabeled in enumerate(train_loader_unlabeled):
-                    semantic_features_unlabeled = model.semantic_embed(
-                        inp1=data_unlabeled["cam_zed_embd"][:, -1:].to(device),
-                        # inp2=data_unlabeled["cam_rs_embd"][:, -1:].to(device),
-                        state=select_xyyaw_from_state(
-                            data_unlabeled["state"][:, -1:]
-                        ).to(device),
-                    )
-                    semantic_features_unlabeled_tensor.append(
-                        semantic_features_unlabeled
-                    )
-                semantic_features_unlabeled_tensor = torch.cat(
-                    semantic_features_unlabeled_tensor, dim=0
-                )  # Concatenate all unlabeled features
-
-                # If ratio is specified, sample the correct amount of unlabeled data
-                if args.use_unlabeled_data and args.unlabeled_ratio != -1.0:
-                    # Ensure that correct amount of unlabeled data is given
-                    all_indices = list(range(len(semantic_features_unlabeled_tensor)))
-                    needed_datapoints = int(
-                        semantic_features.shape[0] * args.unlabeled_ratio
-                    )
-                    if needed_datapoints > len(all_indices):
-                        extra_needed = needed_datapoints - len(all_indices)
-                        extra_indices = random.choices(all_indices, k=extra_needed)
-                        combined_indices = all_indices + extra_indices
-                    else:
-                        combined_indices = all_indices[
-                            random.sample(range(len(all_indices)), k=needed_datapoints)
-                        ]
-                    semantic_features_unlabeled_tensor = (
-                        semantic_features_unlabeled_tensor[combined_indices]
-                    )
 
         labels_gt_xy_masked = copy.deepcopy(labels_gt_xy)
         mask = (labels_gt_xy_masked != -1.0).squeeze()
@@ -372,15 +291,6 @@ for epoch in tqdm(range(0, args.nb_epochs), desc="Training Epochs", position=0):
             ).cuda(),
             T=labels_gt[mask],
         )
-
-        if args.use_unlabeled_data:
-            wandb.log(
-                {
-                    "train/data_ratio": semantic_features_unlabeled_tensor.shape[0]
-                    / semantic_features.shape[0]
-                },
-                step=num_updates,
-            )
 
         opt.zero_grad()
         loss.backward()

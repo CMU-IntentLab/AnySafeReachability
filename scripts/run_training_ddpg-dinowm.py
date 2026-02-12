@@ -18,9 +18,9 @@ from torch.utils.data import DataLoader
 from tqdm import *
 
 import wandb
-from dino_wm.dino_models import VideoTransformer
-from dino_wm.utils import load_state_dict_flexible
-from dino_wm.test_loader import SplitTrajectoryDataset
+from dino_wm.models.dino_models import VideoTransformer
+from dino_wm.utils.utils import load_state_dict_flexible
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 from PyHJ.data import Collector, VectorReplayBuffer
 from PyHJ.env import DummyVectorEnv
 from PyHJ.exploration import GaussianNoise
@@ -56,7 +56,6 @@ wm = VideoTransformer(
     mlp_dim=2048,
     num_frames=3,
     dropout=0.1,
-    nb_classes=6,
 )
 
 # wm.load_state_dict(
@@ -67,30 +66,30 @@ wm = VideoTransformer(
 if args.latent_safe:
     wm.load_state_dict(
         torch.load(
-            f"/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_latent_safe/class_{args.class_id}_best_classifier.pth"
+            f"dino_wm/checkpoints_latent_safe/class_{args.class_id}_best_classifier.pth"
         ),
         strict=False,
     )
 else:
     # wm.load_state_dict(
     #     torch.load(
-    #         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv_mrg_0.1.pth"
+    #         "dino_wm/checkpoints_sem/encoder_priv_mrg_0.1.pth"
     #     ),
     #     strict=False,
     # )
 
     load_state_dict_flexible(
         wm,
-        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
+        "dino_wm/checkpoints_sem/encoder_priv.pth",
     )
 # wm.load_state_dict(
 #     torch.load(
-#         "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints/best_classifier.pth"
+#         "dino_wm/checkpoints/best_classifier.pth"
 #     )
 # )
-hdf5_file = "/home/sunny/data/sweeper/train/consolidated.h5"
-hdf5_file_const = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
-hdf5_file_test = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
+hdf5_file_const = "/data/sunny/sweeper/train/proxy_anchor/consolidated.h5"
+hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
 bs = 1
 bl = 20
 device = "cuda:0"
@@ -203,10 +202,6 @@ policy = DDPGPolicy(
     actor_optim=actor_optim,
     actor_gradient_steps=1,
 )
-
-import ipdb
-
-ipdb.set_trace()
 
 if args.latent_safe:
     log_path = os.path.join("logs/dinowm/latent_safe/class_{}".format(args.class_id))

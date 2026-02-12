@@ -132,8 +132,8 @@ if __name__ == "__main__":
     EVAL_H = 16
     H = 3
 
-    hdf5_file = "/home/sunny/data/sweeper/train/consolidated.h5"
-    hdf5_file_test = "/home/sunny/data/sweeper/test/consolidated.h5"
+    hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
+    hdf5_file_test = "~/data/sweeper/test/consolidated.h5"
 
     expert_data = SplitTrajectoryDataset(
         hdf5_file, BL, split="train", num_test=0, only_pass_labeled_examples=True
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     ).to(device)
     load_state_dict_flexible(
         transition,
-        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints/best_testing.pth",
+        "dino_wm/checkpoints/best_testing.pth",
     )
     # transition.load_state_dict(torch.load("checkpoints/best_testing.pth"), strict=False)
 

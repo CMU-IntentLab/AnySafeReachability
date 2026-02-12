@@ -16,24 +16,26 @@ import torch.nn.functional as F
 from matplotlib.patches import Rectangle
 from torch.utils.data import DataLoader
 
-from dino_wm.test_loader import SplitTrajectoryDataset
-
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
 
 # Import custom modules
 import os
 import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 from gymnasium import spaces
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from torchvision import transforms
 from tqdm import *
 from tqdm import tqdm
-from utils import load_state_dict_flexible
+from dino_wm.utils.utils import load_state_dict_flexible
 
-from dino_wm.dino_decoder import VQVAE
-from dino_wm.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from dino_wm.models.dino_decoder import VQVAE
+from dino_wm.models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
 from PyHJ.exploration import GaussianNoise
 from PyHJ.utils.net.common import Net
 from PyHJ.utils.net.continuous import Actor, Critic
@@ -145,7 +147,6 @@ def make_comparison_video(
     # Default keys if not provided
     all_keys = [
         "pred_fail",
-        "cosine_sim_prox",
         "const1_cos_sim",
         "const2_cos_sim",
         "value_fn",
@@ -159,7 +160,6 @@ def make_comparison_video(
     for key in ["ground_truth", "imagination"]:
         for subkey in (
             ["pred_fail"]  # , "const1_cos_sim", "const2_cos_sim"]
-            + [f"class_{_class}_prox" for _class in range(nb_classes)]
             + [f"class_{_class}_logit" for _class in range(nb_classes)]
         ):
             if subkey in output[key]:
@@ -201,15 +201,6 @@ def make_comparison_video(
     # Image axes
     def init_img(ax, title, color=None):
         img_obj = ax.imshow(np.zeros((224, 224, 3), dtype=np.uint8))
-        # add vertical lines at each third
-        for x in x_class_boundaries:
-            if x <= 0 or x >= 224:
-                continue
-            ax.axvline(x=x, color="black", linestyle="--", linewidth=1, alpha=0.5)
-        for y in y_class_boundaries:
-            if y <= 0 or y >= 224:
-                continue
-            ax.axhline(y=y, color="black", linestyle="--", linewidth=1, alpha=0.5)
         ax.set_title(title)
 
         if color is not None:
@@ -323,34 +314,6 @@ def make_comparison_video(
     for x in range(BL - 1, T, EVAL_H):
         im_graph_ax.axvline(x, color="gray", linestyle="--", linewidth=0.5)
 
-    # Add horizontal lines for each class
-    for key in keys_to_plot:
-        if key in [f"class_{_class}_prox" for _class in range(nb_classes)]:
-            y = -np.tanh(
-                2 * transition.thresholds[keys_to_plot.index(key)].cpu().numpy()
-            )
-            gt_graph_ax.axhline(
-                y, color=colors[keys_to_plot.index(key)], linestyle="--", linewidth=0.5
-            )
-            im_graph_ax.axhline(
-                y, color=colors[keys_to_plot.index(key)], linestyle="--", linewidth=0.5
-            )
-
-    # add vertical lines on ground truth graph every label transition
-    transitions = (
-        np.where(np.diff(output["ground_truth"]["gt_fail_label"], axis=0) != 0)[0] + 1
-    )
-    for x in transitions:
-        for graph in [gt_graph_ax, im_graph_ax]:
-            graph.axvline(
-                x,
-                color=colors[keys_to_plot.index("gt_fail_label")]
-                if "gt_fail_label" in keys_to_plot
-                else "gray",
-                linestyle="--",
-                linewidth=1.0,
-            )
-
     # Prepare images
     def prepare_img(img):
         if img.dtype == np.float16:
@@ -385,25 +348,7 @@ def make_comparison_video(
         im_const2_img.set_data(prepare_img(output["imagination"]["img_constraint2"][0]))
 
         label = int(output["ground_truth"]["gt_fail_label"][t] * nb_classes)
-        if label != -1 and f"class_{label}_prox" in keys_to_plot:
-            label_y = label % (len(y_class_boundaries) - 1)
-            label_x = label // (len(y_class_boundaries) - 1)
-
-            gt_label_rect.set_xy(
-                (x_class_boundaries[label_x], y_class_boundaries[label_y])
-            )
-            gt_label_rect.set_width(
-                x_class_boundaries[label_x + 1] - x_class_boundaries[label_x] + 1
-            )
-            gt_label_rect.set_height(
-                y_class_boundaries[label_y + 1] - y_class_boundaries[label_y] + 1
-            )
-            gt_label_rect.set_edgecolor(
-                colors[keys_to_plot.index(f"class_{label}_prox")]
-            )
-            gt_label_rect.set_visible(True)
-        else:
-            gt_label_rect.set_visible(False)
+        gt_label_rect.set_visible(False)
 
         # Render
         canvas.draw()
@@ -518,7 +463,7 @@ if __name__ == "__main__":
     torch.cuda.manual_seed(seed)
     device = "cuda:0"
 
-    hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
+    hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
     # hdf5_file = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
     database = {}
     with h5py.File(hdf5_file, "r") as hf:
@@ -535,11 +480,10 @@ if __name__ == "__main__":
                 break
 
     constraint_data = SplitTrajectoryDataset(
-        "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5",
+        "/data/sunny/sweeper/train/proxy_anchor/consolidated.h5",
         3,
         split="train",
         num_test=0,
-        only_pass_labeled_examples=True,
     )
     const_data_loader = iter(DataLoader(constraint_data, batch_size=1, shuffle=True))
 
@@ -555,15 +499,13 @@ if __name__ == "__main__":
         mlp_dim=2048,
         num_frames=BL - 1,
         dropout=0.1,
-        nb_classes=nb_classes,
     ).to(device)
 
     load_state_dict_flexible(
         transition,
-        "/home/sunny/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_priv.pth",
+        "dino_wm/checkpoints_sem/encoder_priv.pth",
     )
 
-    # nb_classes = transition.proxies.shape[0]
     # load_state_dict_flexible(transition, "../checkpoints/best_testing.pth")
 
     # transition.load_state_dict(torch.load("../checkpoints/best_classifier.pth"))
@@ -623,18 +565,12 @@ if __name__ == "__main__":
     )
     policy.load_state_dict(
         torch.load(
-            "/home/sunny/AnySafe_Reachability/scripts/logs/dinowm/epoch_id_16/rotvec_policy_priv.pth"
-        )
-    )
-    split_policy = copy.deepcopy(policy)
-    split_policy.load_state_dict(
-        torch.load(
-            "/home/sunny/AnySafe_Reachability/scripts/logs/dinowm/epoch_id_16/rotvec_policy_split.pth"
+            "logs/dinowm/epoch_id_16/rotvec_policy_priv.pth"
         )
     )
 
     decoder = VQVAE().to(device)
-    decoder.load_state_dict(torch.load("../checkpoints/testing_decoder.pth"))
+    decoder.load_state_dict(torch.load("dino_wm/checkpoints/testing_decoder.pth"))
     decoder.eval()
 
     def randomly_select_constraint(const_data_loader, class_id):
@@ -681,11 +617,6 @@ if __name__ == "__main__":
             }
         )  # random class 0 frame
 
-    def proxy_id_to_constraint(proxy_id):
-        return torch.append(
-            transition.proxies[proxy_id], torch.tensor([1.0], device=device)
-        ).unsqueeze(0)
-
     scale = 1.0
 
     num_traj = min(10, len(database))
@@ -701,8 +632,8 @@ if __name__ == "__main__":
             ],
             "img_constraint1": constraint1["front"].unsqueeze(0).cpu().numpy(),
             "img_constraint2": constraint2["front"].unsqueeze(0).cpu().numpy(),
-            "const1_gt_label": copy.deepcopy(none_list),
-            "const2_gt_label": copy.deepcopy(none_list),
+            "const1_gt_dist": copy.deepcopy(none_list),
+            "const2_gt_dist": copy.deepcopy(none_list),
             "const1_cos_sim": copy.deepcopy(none_list),
             "const2_cos_sim": copy.deepcopy(none_list),
             "const1_value_fn": copy.deepcopy(none_list),
@@ -710,11 +641,9 @@ if __name__ == "__main__":
             "pred_fail": copy.deepcopy(none_list),
             "gt_fail_label": get_class_from_xy(data["failure"][:]).cpu().numpy()
             / nb_classes,
-            "split_value_fn": copy.deepcopy(none_list),
         }
         for class_id in range(nb_classes):
             output_dict[f"class_{class_id}_logit"] = copy.deepcopy(none_list)
-            output_dict[f"class_{class_id}_prox"] = copy.deepcopy(none_list)
             output_dict[f"class_{class_id}_value_fn"] = copy.deepcopy(none_list)
         output = {
             "imagination": copy.deepcopy(output_dict),
@@ -759,18 +688,7 @@ if __name__ == "__main__":
                             return_latent=True,
                         )
                     )
-                    # pred_labels = transition.multi_class_head(latent)
-                    # pred_labels = torch.mean(pred_labels, dim=-2)
-
-                    proxies = transition.proxies.to(device)  # [M Z]
-
-                    queries_norm = F.normalize(
-                        semantic_features.squeeze(), p=2, dim=1
-                    )  # [N, Z]
-                    proxies_norm = F.normalize(proxies, p=2, dim=1)  # [M, Z]
-
-                    # Compute cosine similarity
-                    cos_sim_matrix = queries_norm @ proxies_norm.T
+                    
                     # Decode images
                     # pred_ims: [1, C, H, W] H is height not horizon
                     pred_ims, _ = decoder(pred1[:, [-1]])
@@ -810,39 +728,11 @@ if __name__ == "__main__":
             output["imagination"]["pred_fail"].append(
                 pred_fail.detach().squeeze().cpu().numpy()[-1]
             )
-            output["imagination"]["split_value_fn"].append(
-                evaluate_V(
-                    policy=split_policy,
-                    latent=latent,
-                    constraint=transition.proxies[0],
-                    action=data["action"][t + BL - 1, :],
-                    device=device,
-                )
-            )
-            for class_id in range(nb_classes):
-                # output["imagination"][f"class_{class_id}_logit"].append(
-                #     -pred_labels.detach().squeeze().cpu().numpy()[-1, class_id]
-                # )
-                output["imagination"][f"class_{class_id}_prox"].append(
-                    -cos_sim_matrix[-1, class_id].item()
-                    # - transition.thresholds[class_id].item()
-                )
 
             if t + BL >= len(data["action"]):  # Last step
                 index = t + BL - 1
             else:
                 index = t + BL
-
-            for _class in range(nb_classes):
-                output["imagination"][f"class_{_class}_value_fn"].append(
-                    evaluate_V(
-                        policy=policy,
-                        latent=latent,
-                        constraint=transition.proxies[_class],
-                        action=data["action"][index, :],
-                        device=device,
-                    )
-                )
 
             for constraint, const_key in [
                 (constraint1, "const1"),
@@ -855,11 +745,6 @@ if __name__ == "__main__":
                         dim=0,
                     ).item()
                     # + 0.3
-                )
-                # Debugging: What is cosine similarity with proxy and constraint?
-                F.cosine_similarity(
-                    transition.proxies[:],
-                    constraint["semantic_feat"].unsqueeze(0),
                 )
 
                 output["imagination"][f"{const_key}_value_fn"].append(
@@ -879,7 +764,7 @@ if __name__ == "__main__":
 
                 dist_const = -2 * (dist_const / 250) + 1
 
-                output["imagination"][f"{const_key}_gt_label"].append(-dist_const)
+                output["imagination"][f"{const_key}_gt_dist"].append(-dist_const)
 
         lengths = [
             len(output["imagination"][key]) for key in output["imagination"].keys()
@@ -924,21 +809,6 @@ if __name__ == "__main__":
                     # pred_fail: [1, (T-1), 1]
                     pred_fail = transition.fail_pred(inp1=inputs1, state=states)
 
-                    # pred_labels: [1, (T-1), num_classes]
-                    # pred_labels = transition.multi_class_head(latent)
-                    # pred_labels = torch.mean(pred_labels, dim=-2)
-
-                    # Calculate cos sim for failure margin
-                    proxies = transition.proxies.to(device)  # [M Z]
-
-                    queries_norm = F.normalize(
-                        semantic_features.squeeze(), p=2, dim=1
-                    )  # [N, Z]
-                    proxies_norm = F.normalize(proxies, p=2, dim=1)  # [M, Z]
-
-                    # Compute cosine similarity
-                    cos_sim_matrix = queries_norm @ proxies_norm.T
-
             # inputs2 = data["cam_rs_embd"][[t + BL - 1], :].to(device).unsqueeze(0)
             inputs1 = data["cam_zed_embd"][t : t + BL - 1, :].to(device).unsqueeze(0)
             acs = data["action"][t : t + BL - 1, :].to(device).unsqueeze(0)
@@ -957,39 +827,13 @@ if __name__ == "__main__":
             #     .numpy()[-1]
             # )
             output["ground_truth"]["pred_fail"].append(pred_fail)
-            output["ground_truth"]["split_value_fn"].append(
-                evaluate_V(
-                    policy=split_policy,
-                    latent=latent,
-                    constraint=transition.proxies[0] * 0.0,
-                    action=data["action"][t + BL - 1, :],
-                    device=device,
-                )
-            )
-            for class_id in range(nb_classes):
-                # output["ground_truth"][f"class_{class_id}_logit"].append(
-                #     -pred_labels.detach().squeeze().cpu().numpy()[-1, class_id]
-                # )
-                output["ground_truth"][f"class_{class_id}_prox"].append(
-                    -cos_sim_matrix[-1, class_id].item()
-                    # - transition.thresholds[class_id].item()
-                )
 
             if t + BL >= len(data["action"]):  # Last step
                 index = t + BL - 1
             else:
                 index = t + BL
 
-            for _class in range(nb_classes):
-                output["ground_truth"][f"class_{_class}_value_fn"].append(
-                    evaluate_V(
-                        policy=policy,
-                        latent=latent,
-                        constraint=transition.proxies[_class],
-                        action=data["action"][index, :],
-                        device=device,
-                    )
-                )
+
             for constraint, const_key in [
                 (constraint1, "const1"),
                 (constraint2, "const2"),
@@ -1001,12 +845,6 @@ if __name__ == "__main__":
                         dim=0,
                     ).item()
                     # + 0.3
-                )
-
-                # Sanity Check: What is cosine similarity with proxy and constraint?
-                F.cosine_similarity(
-                    transition.proxies[2].unsqueeze(0),
-                    constraint["semantic_feat"].unsqueeze(0),
                 )
 
                 output["ground_truth"][f"{const_key}_value_fn"].append(
@@ -1026,8 +864,7 @@ if __name__ == "__main__":
 
                 dist_const = -2 * (dist_const / 250) + 1
 
-                output["ground_truth"][f"{const_key}_gt_label"].append(-dist_const)
-            # output["ground_truth"]["cosine_sim_prox"].append(cos_sim_fail * scale)
+                output["ground_truth"][f"{const_key}_gt_dist"].append(-dist_const)
             # output["ground_truth"]["value_fn"].append(
             #     policy.critic(
             #         obs=latent[:, [-1]].mean(dim=2),
@@ -1054,25 +891,20 @@ if __name__ == "__main__":
 
         line_keys = [
             # "pred_fail",
-            # "cosine_sim_prox",
             "const1_cos_sim",
             # "const2_cos_sim",
-            "const1_gt_label",
-            # "const2_gt_label",
+            "const1_gt_dist",
+            # "const2_gt_dist",
             # "value_fn_ken",
             # "gt_fail_label",
-            # "split_value_fn",
             "const1_value_fn",
             # "const2_value_fn",
         ]
         for _class in range(nb_classes):
             # line_keys.append(f"class_{_class}_logit")
-            # line_keys.append(f"class_{_class}_prox")
             # line_keys.append(f"class_{_class}_value_fn")
 
             1 + 1
-
-        # line_keys.append(f"class_{5}_prox")
 
         make_comparison_video(
             output_dict=output,

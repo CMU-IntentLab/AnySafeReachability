@@ -13,8 +13,8 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
 
 # Import custom modules
-from dino_wm.dino_decoder import VQVAE
-from dino_wm.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
+from dino_wm.models.dino_decoder import VQVAE
+from dino_wm.models.dino_models import VideoTransformer, normalize_acs, select_xyyaw_from_state
 from torchvision import transforms
 from tqdm import tqdm
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     device = "cuda:0"
 
     EVAL_H = 32
-    hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
+    hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
     # hdf5_file = "/home/sunny/data/sweeper/train/optimal/traj_0001.hdf5"
     database = {}
     with h5py.File(hdf5_file, "r") as hf:

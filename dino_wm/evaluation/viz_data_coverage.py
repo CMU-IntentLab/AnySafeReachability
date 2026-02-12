@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 # Import custom modules
-from dino_wm.dino_models import VideoTransformer, normalize_acs
-from dino_wm.test_loader import SplitTrajectoryDataset
+from dino_wm.models.dino_models import VideoTransformer, normalize_acs
+from dino_wm.utils.test_loader import SplitTrajectoryDataset
 
 print(sys.path)
 dino = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14_reg")
@@ -173,7 +173,7 @@ transition = VideoTransformer(
 transition.load_state_dict(torch.load("../checkpoints/best_testing.pth"), strict=False)
 transition.eval()
 
-hdf5_file = "/home/sunny/data/sweeper/test/consolidated.h5"
+hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,
     32,
