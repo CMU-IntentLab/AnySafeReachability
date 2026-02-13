@@ -83,16 +83,27 @@ python dino_wm/train_failure_classifier.py
 ```
 The best transistion model is saved as `checkpoints_sem/encoder_priv.pth`
 
-You can download the pre-trained world model for the "Sweeper" task: [sweeper model](LINK).
+You can download the pre-trained world model for the "Sweeper" task: [sweeper model](https://drive.google.com/file/d/1AOBipzDxCQDCHAqT_ieUbocK8J2u9AlD/view?usp=sharing).
 ```bash
 # Download sweeper world model with semantic encoder
 pip install gdown
-gdown LINK
+mkdir -p dino_wm/checkpoints_sem
+gdown "https://drive.google.com/file/d/1AOBipzDxCQDCHAqT_ieUbocK8J2u9AlD/view?usp=sharing" \
+    -O dino_wm/checkpoints_sem/encoder_priv.pth
 ```
 
 ## 🛡️ Step 3: Constraint-Conditioned Reachability
 ```bash
 python scripts/run_training_ddpg-dinowm.py # save policy
+```
+
+You can download the pre-trained policy for the "Sweeper" task: [sweeper policy](https://drive.google.com/file/d/1C3b9bYIZ6ayaGTkQKumICSArmGPJpDD1/view?usp=sharing).
+```bash
+# Download sweeper policy
+pip install gdown
+mkdir -p logs/dinowm/epoch_id_16
+gdown "https://drive.google.com/file/d/1C3b9bYIZ6ayaGTkQKumICSArmGPJpDD1/view?usp=sharing" \
+    -O logs/dinowm/epoch_id_16/rotvec_policy_priv.pth
 ```
 
 ## 🎯 Step 4: Conformal Prediction
