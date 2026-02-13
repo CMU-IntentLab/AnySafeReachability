@@ -254,9 +254,6 @@ save_path = os.path.join(log_path + "/epoch_id_{}".format(epoch_id), "policy.pth
 policy.load_state_dict(torch.load(save_path))
 policy.eval()
 
-# /home/sunny/AnySafe_Reachability/scripts/logs/dreamer_dubins/PyHJ/sim_learned_dist_type_v_V(z, z_c_sem)_const_embd_512/epoch_id_8/policy.pth
-
-
 if args.continue_training_epoch is not None:
     epoch = args.continue_training_epoch
     policy.load_state_dict(

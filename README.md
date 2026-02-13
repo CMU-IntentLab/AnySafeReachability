@@ -40,18 +40,20 @@ python scripts/dreamer_offline.py
 
 Produces **`rssm_ckpt.pt`** file.
 
-Download pre-trained world model...
-```bash
-pip install gdown
-gdown ...
-```
-
 ## 🏋️ Train semantic encoder
 
 ```bash
 python scripts/train_failure_classifier_sem_dubins.py
 ```
 Produces **`encoder_task_dubins-wm.pth.pt`** file.
+
+Download pre-trained world model and semantic encoder:
+```bash
+pip install gdown
+mkdir -p logs/checkpoints_sem/
+gdown "https://drive.google.com/file/d/1tCRG6cpBcrLcbA0ckf9Hquk3Bekhg_S6/view?usp=sharing" \
+  -O logs/checkpoints_sem/encoder_task_dubins-wm.pth
+```
 
 ## 🛡️ Constraint-Conditioned Latent Reachability Analysis
 
@@ -61,10 +63,12 @@ Run RL for constraint-conditioned latent-space reachability:
 python scripts/run_training_ddpg_wm.py 
 ```
 
-Download pre-trained filter...
+Download pre-trained filter:
 ```bash
 pip install gdown
-gdown ...
+mkdir -p "logs/dreamer_dubins/PyHJ/sim_cos_sim_dist_type_ds_V(z, z_c_sem)_const_embd_512/epoch_id_6"
+gdown "https://drive.google.com/file/d/1yyOhKWvPm3-M_Kk8i12VxM8UN-L7aGCr/view?usp=sharing" \
+  -O "logs/dreamer_dubins/PyHJ/sim_cos_sim_dist_type_ds_V(z, z_c_sem)_const_embd_512/epoch_id_6/policy.pth"
 ```
 
 ## 🎯 Threshold Calibration

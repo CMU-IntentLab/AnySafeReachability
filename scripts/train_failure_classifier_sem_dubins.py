@@ -18,11 +18,14 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # note: need to include the dreamerv3 repo for this
 from termcolor import cprint
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-dreamer_dir = os.path.abspath("/home/sunny/AnySafe_Reachability/dreamerv3_torch")
-sys.path.append(dreamer_dir)
-saferl_dir = os.path.abspath("/home/sunny/AnySafe_Reachability/PyHJ")
-sys.path.append(saferl_dir)
+from pathlib import Path
+import sys
+
+# AnySafeReachability/
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+sys.path.insert(0, str(REPO_ROOT))
+
 print(sys.path)
 from dreamerv3_torch import models, tools
 from dreamerv3_torch.dreamer import make_dataset
