@@ -173,7 +173,7 @@ transition = VideoTransformer(
 transition.load_state_dict(torch.load("../checkpoints/best_testing.pth"), strict=False)
 transition.eval()
 
-hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
+hdf5_file = "path/to/test/dataset/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,
     32,

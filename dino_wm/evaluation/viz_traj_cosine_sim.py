@@ -463,8 +463,8 @@ if __name__ == "__main__":
     torch.cuda.manual_seed(seed)
     device = "cuda:0"
 
-    hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
-    # hdf5_file = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
+    hdf5_file = "path/to/test/dataset/consolidated.h5"
+    # hdf5_file = "path/to/constraint/dataset/consolidated.h5"
     database = {}
     with h5py.File(hdf5_file, "r") as hf:
         trajectory_ids = list(hf.keys())
@@ -480,7 +480,7 @@ if __name__ == "__main__":
                 break
 
     constraint_data = SplitTrajectoryDataset(
-        "/data/sunny/sweeper/train/proxy_anchor/consolidated.h5",
+        "path/to/constraint/dataset/consolidated.h5",
         3,
         split="train",
         num_test=0,

@@ -27,7 +27,7 @@ def count_parameters(model):
 if __name__ == "__main__":
     wandb.init(project="dino-WM", name="Decoder")
 
-    hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
+    hdf5_file = "path/to/train/dataset/consolidated.h5"
     H = 1
     BS = 64
     expert_data = SplitTrajectoryDataset(hdf5_file, H, split="train", num_test=100)

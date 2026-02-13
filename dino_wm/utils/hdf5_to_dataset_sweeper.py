@@ -226,10 +226,10 @@ def convert_hdf5_to_consolidated_hdf5(hdf5_dir, output_hdf5_file):
 
 
 if __name__ == "__main__":
-    hdf5_dir = "/data/sunny/sweeper/exp_3/key_4321_thresh_-0.4"
-    output_hdf5_file = "/data/sunny/sweeper/exp_3/key_4321_thresh_-0.4/consolidated.h5"
+    hdf5_dir = "path/to/dataset/trajectories/"
+    output_hdf5_file = "path/to/dataset/consolidated.h5"
 
-    dir = "/data/sunny/sweeper/exp_3/"
+    dir = "path/to/dataset/"
     subfolders =[f for f in os.listdir(dir) if os.path.isdir(os.path.join(dir, f))]
     for folder in subfolders:
         hdf5_dir = os.path.join(dir, folder)

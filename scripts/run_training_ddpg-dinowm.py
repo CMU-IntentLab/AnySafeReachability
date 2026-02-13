@@ -58,11 +58,6 @@ wm = VideoTransformer(
     dropout=0.1,
 )
 
-# wm.load_state_dict(
-#     torch.load(
-#         "/home/sunny/anysafe_project/AnySafe_Reachability/dino_wm/checkpoints_sem/encoder_mrg_0.1_num_ex_20.pth"
-#     )
-# )
 if args.latent_safe:
     wm.load_state_dict(
         torch.load(
@@ -87,9 +82,9 @@ else:
 #         "dino_wm/checkpoints/best_classifier.pth"
 #     )
 # )
-hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
-hdf5_file_const = "/data/sunny/sweeper/train/proxy_anchor/consolidated.h5"
-hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
+hdf5_file = "path/to/train/dataset/consolidated.h5"
+hdf5_file_const = "path/to/constraint/dataset/consolidated.h5"
+hdf5_file_test = "path/to/test/dataset/consolidated.h5"
 bs = 1
 bl = 20
 device = "cuda:0"

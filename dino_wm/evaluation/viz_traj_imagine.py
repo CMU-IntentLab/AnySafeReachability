@@ -122,8 +122,7 @@ if __name__ == "__main__":
     device = "cuda:0"
 
     EVAL_H = 32
-    hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
-    # hdf5_file = "/home/sunny/data/sweeper/train/optimal/traj_0001.hdf5"
+    hdf5_file = "path/to/test/dataset/consolidated.h5"
     database = {}
     with h5py.File(hdf5_file, "r") as hf:
         trajectory_ids = list(hf.keys())

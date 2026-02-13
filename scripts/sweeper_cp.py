@@ -93,8 +93,8 @@ if args.gpu_id != -1:
 BS = args.sz_batch  # batch size
 BL = 1
 
-hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
-hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
+hdf5_file = "path/to/train/dataset/consolidated.h5"
+hdf5_file_test = "path/to/test/dataset/consolidated.h5"
 
 test_data = SplitTrajectoryDataset(
     hdf5_file_test,

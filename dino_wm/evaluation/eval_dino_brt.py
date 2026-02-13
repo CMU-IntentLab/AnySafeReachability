@@ -400,8 +400,8 @@ for k in range(nb_classes):
     )
     latent_safe_policies[k].eval()
 
-hdf5_file = "/data/sunny/sweeper/test/consolidated.h5"
-hdf5_file_const = "/home/sunny/data/sweeper/proxy_anchor/consolidated.h5"
+hdf5_file = "path/to/test/dataset/consolidated.h5"
+hdf5_file_const = "path/to/constraint/dataset/consolidated.h5"
 train_data = SplitTrajectoryDataset(
     hdf5_file,
     BL,

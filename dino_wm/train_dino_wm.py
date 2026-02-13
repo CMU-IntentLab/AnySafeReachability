@@ -53,8 +53,8 @@ if __name__ == "__main__":
     EVAL_H = 16
     H = 3
 
-    hdf5_file = "/data/sunny/sweeper/train/consolidated.h5"
-    hdf5_file_test = "/data/sunny/sweeper/test/consolidated.h5"
+    hdf5_file = "path/to/train/dataset/consolidated.h5"
+    hdf5_file_test = "path/to/test/dataset/consolidated.h5"
 
     expert_data = SplitTrajectoryDataset(
         hdf5_file, BL, split="train", num_test=0, provide_labels=True

@@ -155,7 +155,7 @@ def postprocess_trajectory(traj_file, labels, label_type):
 plt.ion()
 
 if __name__ == "__main__":
-    directory = "/data/sunny/sweeper/exp_3/"
+    directory = "/path/to/dataset/"
     label_type = "xy_pos_label"
     reset_regardless_of_label = True
     start_idx = 0
