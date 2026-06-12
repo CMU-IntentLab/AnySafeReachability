@@ -164,6 +164,9 @@ class Dreamer(nn.Module):
                 + list(self._wm.dynamics.parameters())
             }
             model_params["params"] += list(self._wm.heads["decoder"].parameters())
+            model_params["params"] += list(self._wm.heads["margin"].parameters())
+            model_params["params"] += list(self._wm.heads["cont"].parameters())
+
             actor_params = {
                 "params": list(self._task_behavior.actor.parameters()),
                 "lr": config.actor["lr"],
